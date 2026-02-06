@@ -106,7 +106,6 @@ graph LR
 ---
 
 ### 3. Visit Occurrence
-
 ```mermaid
 graph LR
     dbo_visit["dbo_visit"]
