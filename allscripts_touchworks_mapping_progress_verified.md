@@ -181,25 +181,6 @@ graph LR
 - Executed successfully during the most recent client demo, covering joins across provider/person/specialty/license/resource/service/location tables with MERGE logic to Silver and Gold.
 ---
 
-## Placeholder / In-Progress Notebooks
-
-| OMOP Table | Notebook | Current Contents | Next Actions |
-|---|---|---|---|
-| measurement | `omop/hydration/measurement/allscripts_touchworks_measurement.ipynb` | Single markdown cell listing candidate Bronze tables | Build transformations from `order_activity_header`, `order_result_mapper`, `result_text`, `vendor_item`, `vendor_item_extension`; add concept/unit mappings |
-| procedure_occurrence | `.../procedure_occurrence/allscripts_touchworks_procedure_occurrence.ipynb` | Markdown + `%sql DESCRIBE` only | Implement joins across encounter_itemchild/other, charge_modifier, cpt4_modifier, vendor_item; derive procedure concepts |
-| visit_detail | `.../visit_detail/allscripts_touchworks_visit_detail.ipynb` | Empty code cell | Design visit-detail hierarchy keyed to `dbo_visit_detail` + visit_occurrence IDs |
-| device_exposure | `.../device_exposure/allscripts_touchworks_device_exposure.ipynb` | Markdown listing `dbo_vendor_item` | Determine device filters + concept mappings, add MERGE logic |
-| note / note_nlp | `.../note`, `.../note_nlp` | Source inventories only | Implement text extraction from result_text/vendor_item + NLP annotations |
-| specimen | `.../specimen/allscripts_touchworks_specimen.ipynb` | Empty code cell | Build pipeline from lab/specimen sources |
-| payer_plan_period | `.../payer_plan_period/allscripts_touchworks_payer_plan_period.ipynb` | Empty code cell | Identify insurance tables and derive coverage spans |
-| cost | `.../cost/allscripts_touchworks_cost.ipynb` | Empty code cell | Model claim costs from encounter/charge tables |
-| dose_era, episode, episode_event, cohort, cohort_definition, cohort_attribute, attribute_definition, cdm_source, metadata, source_to_concept_map | Corresponding notebooks | Single `%sql DESCRIBE` or empty cells | Flesh out transformations or confirm whether these should be loaded from external reference files |
-| care_site | `.../care_site/allscripts_touchworks_care_site.ipynb` | Malformed JSON similar to provider | Re-export notebook, design joins across site/department/practice/service tables |
-| death | _Notebook not yet created_ | N/A | Define source-of-truth for mortality data and build hydration |
-| condition_era | _Notebook not yet created_ | N/A | Derive eras from condition_occurrence outputs once stable |
-| drug_era | _Notebook not yet created_ | N/A | Derive eras from drug_exposure outputs once stable |
-| fact_relationship | Stub notebook only | No ETL logic beyond placeholder | Implement relationship mappings or drop if not needed |
-| Additional domain mapping support (custom `source_to_concept_map`) | _Notebook not yet created_ | N/A | Determine broader mapping requirements beyond existing vocabulary loaders |
 
 
 ## Shared Source Tables (Updated)
