@@ -1,0 +1,204 @@
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+  // Convert <pre><code class="language-mermaid">...</code></pre> into <div class="mermaid">...</div>
+  document.querySelectorAll('pre > code.language-mermaid').forEach(code => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = code.textContent;
+    code.parentElement.replaceWith(div); // replace the <pre> wrapper
+  });
+
+  mermaid.initialize({ startOnLoad: true });
+  await mermaid.run();
+</script>
+
+<h1>Allscripts TouchWorks → OMOP CDM Mapping (Verified February 6, 2026)</h1>
+<p>This document is a point-in-time verification of the Allscripts TouchWorks hydration workbooks that populate the OMOP Common Data Model through the medallion (Bronze → Silver → Gold) pipeline.</p>
+<hr />
+<h2>Executive Summary</h2>
+<ul>
+<li><strong>Production-ready flows:</strong> person, observation_period, visit_occurrence, condition_occurrence, drug_exposure, observation, location, and provider all have end-to-end MERGE logic that has been executed successfully for the current client deliverables.</li>
+<li><strong>Provider pipeline:</strong> notebook was run successfully during the recent client demo and is ready for hand-off.</li>
+<li><strong>Placeholders created:</strong> 15 additional notebooks exist but only contain source inventories or exploratory SQL (measurement, visit_detail, procedure_occurrence, device_exposure, notes, payer_plan_period, cost, cohort/episode families, etc.). These should be tracked as &quot;in progress&quot; rather than &quot;not started&quot; so expectations stay realistic.</li>
+<li><strong>Uncovered OMOP areas:</strong> death, condition_era, drug_era, dose_era (logic missing despite stub), fact_relationship (stub only), metadata/cdm_source mapping not yet implemented, and the entire cohort/cost suites remain TODO.</li>
+</ul>
+<hr />
+<h2>Mapping Status (Hydration Coverage)</h2>
+<p>| OMOP Table | Notebook | Bronze Sources (#) | Implementation Maturity | Known Gaps / Notes |
+|---|---|---|---|---|
+| person | <code>omop/hydration/person/allscripts_touchworks_person.ipynb</code> | 6 (patient_member, person, person_other, ethnicity_de, race_de, sex_de) | <strong>Production</strong> – MERGE to Silver + Gold and <code>source_to_person</code> mapping | <code>location_id</code>, <code>provider_id</code>, <code>care_site_id</code> stay NULL until those tables exist |
+| observation_period | <code>omop/hydration/observation_period/allscripts_touchworks_observation_period.ipynb</code> | 5 (interface_audit_appointment, order_activity_header, vendor_item, item_medication, person_other) | <strong>Production</strong> – Silver + Gold merges with min/max logic | None identified; depends on <code>source_to_person</code> |
+| visit_occurrence | <code>omop/hydration/visit_occurrence/allscripts_touchworks_visit_occurrence.ipynb</code> | 6 (visit, visit_detail, visit_type_de, encounter_other, encounter_itemchild, site_de) | <strong>Production</strong> – Silver/Gold merges | <code>provider_id</code>, <code>care_site_id</code>, admitted/discharged concepts pending provider/care_site tables |
+| condition_occurrence | <code>omop/hydration/condition_occurrence/allscripts_touchworks_condition_occurrence.ipynb</code> | 1 (+ optional vendor_item_extension) | <strong>Production</strong> – Silver/Gold merges | Missing <code>provider_id</code>, <code>visit_occurrence_id</code>, <code>visit_detail_id</code>; optional source not documented originally |
+| drug_exposure | <code>omop/hydration/drug_exposure/allscripts_touchworks_drug_exposure.ipynb</code> | 3 (medication, medication_de, item_medication) | <strong>Production</strong> | <code>provider_id</code>, <code>visit_occurrence_id</code>, <code>visit_detail_id</code> unresolved |
+| observation | <code>omop/hydration/observation/allscripts_touchworks_observation.ipynb</code> | 4 (item_result, result, item_finding, finding) | <strong>Production</strong> | <code>value_as_concept_id</code>, <code>unit_concept_id</code>, <code>provider_id</code>, <code>visit_detail_id</code> pending mappings |
+| location | <code>omop/hydration/location/allscripts_touchworks_location.ipynb</code> | 3 listed (person_address, pharmacy_de, site_de) scoped to the client demo cohort | <strong>Production (demo scope)</strong> – merges execute successfully for the curated address sample required by the client | Broader extraction (all addresses/pharmacies/sites) can be enabled later if prioritized |
+| provider | <code>omop/hydration/provider/allscripts_touchworks_provider.ipynb</code> | 10+ sources (provider, person, specialty_de, prescriber_license, resource_de, service_de, location_de, location_type_de, provider_type_de, sex_de) | <strong>Production</strong> – logic validated in recent client demo | No outstanding gaps aside from <code>care_site_id</code> upstream dependency |</p>
+<hr />
+<h2>Detailed Mapping Flows (Verified)</h2>
+<h3>1. Person (Production)</h3>
+<pre><code class="language-mermaid">graph LR
+    patient_member[&quot;dbo_patient_member&quot;]
+    dbo_person[&quot;dbo_person&quot;]
+    dbo_person_other[&quot;dbo_person_other&quot;]
+    dbo_sex[&quot;dbo_sex_de&quot;]
+    dbo_race[&quot;dbo_race_de&quot;]
+    dbo_ethnicity[&quot;dbo_ethnicity_de&quot;]
+
+    NB[&quot;allscripts_touchworks_person.ipynb&quot;]
+    SILVER[&quot;omop_silver.person&quot;]
+    GOLD[&quot;omop.person&quot;]
+
+    patient_member --&gt; NB
+    dbo_person --&gt; NB
+    dbo_person_other --&gt; NB
+    dbo_sex --&gt; NB
+    dbo_race --&gt; NB
+    dbo_ethnicity --&gt; NB
+    NB --&gt; SILVER
+    SILVER --&gt; GOLD
+</code></pre>
+<ul>
+<li><strong>Validation:</strong> <code>%sql MERGE</code> blocks load both Silver and Gold, with <code>source_to_person</code> managing IDs.</li>
+<li><strong>Gaps:</strong> <code>location_id</code>, <code>provider_id</code>, <code>care_site_id</code> remain NULL until downstream dimensions exist.</li>
+</ul>
+<h3>2. Observation Period (Production)</h3>
+<pre><code class="language-mermaid">graph LR
+    iaa[&quot;dbo_interface_audit_appointment&quot;]
+    oah[&quot;dbo_order_activity_header&quot;]
+    vi[&quot;dbo_vendor_item&quot;]
+    im[&quot;dbo_item_medication&quot;]
+    po[&quot;dbo_person_other&quot;]
+
+    NB[&quot;allscripts_touchworks_observation_period.ipynb&quot;]
+    SILVER[&quot;omop_silver.observation_period&quot;]
+    GOLD[&quot;omop.observation_period&quot;]
+
+    iaa --&gt; NB
+    oah --&gt; NB
+    vi --&gt; NB
+    im --&gt; NB
+    po --&gt; NB
+    NB --&gt; SILVER
+    SILVER --&gt; GOLD
+</code></pre>
+<ul>
+<li><strong>Strategy:</strong> MIN/MAX clinical activity per patient; DateOfDeath cap via <code>dbo_person_other</code>.</li>
+</ul>
+<h3>3. Visit Occurrence (Production)</h3>
+<pre><code class="language-mermaid">graph LR
+    visit[&quot;dbo_visit&quot;]
+    visit_detail[&quot;dbo_visit_detail&quot;]
+    visit_type[&quot;dbo_visit_type_de&quot;]
+    enc_other[&quot;dbo_encounter_other&quot;]
+    enc_child[&quot;dbo_encounter_itemchild&quot;]
+    site[&quot;dbo_site_de&quot;]
+
+    NB[&quot;allscripts_touchworks_visit_occurrence.ipynb&quot;]
+    SILVER[&quot;omop_silver.visit_occurrence&quot;]
+    GOLD[&quot;omop.visit_occurrence&quot;]
+
+    visit --&gt; NB
+    visit_detail --&gt; NB
+    visit_type --&gt; NB
+    enc_other --&gt; NB
+    enc_child --&gt; NB
+    site --&gt; NB
+    NB --&gt; SILVER
+    SILVER --&gt; GOLD
+</code></pre>
+<ul>
+<li><strong>Next dependencies:</strong> provider + care_site hydration required for FK backfill; visit_detail notebook must provide child visits before those IDs populate.</li>
+</ul>
+<h3>4. Condition Occurrence (Production)</h3>
+<pre><code class="language-mermaid">graph LR
+    vi[&quot;dbo_vendor_item&quot;]
+    vie[&quot;dbo_vendor_item_extension (optional)&quot;]
+
+    NB[&quot;allscripts_touchworks_condition_occurrence.ipynb&quot;]
+    SILVER[&quot;omop_silver.condition_occurrence&quot;]
+    GOLD[&quot;omop.condition_occurrence&quot;]
+
+    vi --&gt; NB
+    vie --&gt; NB
+    NB --&gt; SILVER
+    SILVER --&gt; GOLD
+</code></pre>
+<ul>
+<li><strong>Notes:</strong> SNOMED mappings through vocabulary tables; provider/visit IDs still NULL.</li>
+</ul>
+<h3>5. Drug Exposure (Production)</h3>
+<pre><code class="language-mermaid">graph LR
+    med[&quot;dbo_medication&quot;]
+    med_de[&quot;dbo_medication_de&quot;]
+    item_med[&quot;dbo_item_medication&quot;]
+
+    NB[&quot;allscripts_touchworks_drug_exposure.ipynb&quot;]
+    SILVER[&quot;omop_silver.drug_exposure&quot;]
+    GOLD[&quot;omop.drug_exposure&quot;]
+
+    med --&gt; NB
+    med_de --&gt; NB
+    item_med --&gt; NB
+    NB --&gt; SILVER
+    SILVER --&gt; GOLD
+</code></pre>
+<ul>
+<li><strong>Notes:</strong> RxNorm/NDC concept resolution implemented; FK backfills pending.</li>
+</ul>
+<h3>6. Observation (Production)</h3>
+<pre><code class="language-mermaid">graph LR
+    item_result[&quot;dbo_item_result&quot;]
+    result_tbl[&quot;dbo_result&quot;]
+    item_finding[&quot;dbo_item_finding&quot;]
+    finding[&quot;dbo_finding&quot;]
+
+    NB[&quot;allscripts_touchworks_observation.ipynb&quot;]
+    SILVER[&quot;omop_silver.observation&quot;]
+    GOLD[&quot;omop.observation&quot;]
+
+    item_result --&gt; NB
+    result_tbl --&gt; NB
+    item_finding --&gt; NB
+    finding --&gt; NB
+    NB --&gt; SILVER
+    SILVER --&gt; GOLD
+</code></pre>
+<ul>
+<li><strong>Gaps:</strong> concept/unit IDs outstanding; visit/provider linkage pending order header + provider hydration.</li>
+</ul>
+<h3>7. Location (Production – Demo Scope)</h3>
+<pre><code class="language-mermaid">graph LR
+    pa[&quot;dbo_person_address&quot;]
+    pharm[&quot;dbo_pharmacy_de (planned)&quot;]
+    site[&quot;dbo_site_de (planned)&quot;]
+
+    NB[&quot;allscripts_touchworks_location.ipynb&quot;]
+    SILVER[&quot;omop_silver.location&quot;]
+    GOLD[&quot;omop.location&quot;]
+
+    pa --&gt; NB
+    NB --&gt; SILVER
+    SILVER --&gt; GOLD
+</code></pre>
+<ul>
+<li><strong>Reality:</strong> Current load focuses on the curated address slice demonstrated for the client; additional sources such as pharmacy and site data can be layered in when needed.</li>
+</ul>
+<h3>8. Provider (Production)</h3>
+<ul>
+<li>Executed successfully during the most recent client demo, covering joins across provider/person/specialty/license/resource/service/location tables with MERGE logic to Silver and Gold.</li>
+</ul>
+<hr />
+<h2>Shared Source Tables (Updated)</h2>
+<p>| Bronze Source Table | Feeds Into |
+|---|---|
+| <code>dbo_vendor_item</code> | condition_occurrence, observation_period, drug_exposure (via joins), device_exposure (planned)
+| <code>dbo_item_medication</code> | drug_exposure, observation_period |
+| <code>dbo_order_activity_header</code> | observation_period, observation (visit linkage), measurement (planned) |
+| <code>dbo_person_other</code> | person, observation_period |
+| <code>dbo_person</code> | person, provider (planned) |
+| <code>dbo_sex_de</code> | person, provider (planned) |
+| <code>dbo_site_de</code> | visit_occurrence, location (planned), provider (planned) |
+| <code>dbo_visit_detail</code> | visit_occurrence, visit_detail (planned) |</p>
+<p>Maintain this table so downstream ETL owners understand cross-notebook coupling.</p>
