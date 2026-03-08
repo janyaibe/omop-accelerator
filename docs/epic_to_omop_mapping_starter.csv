@@ -1,0 +1,59 @@
+Epic source table,Epic source column,OMOP table,OMOP field,Join key,Notes
+PATIENT,PAT_ID,person,person_source_value,Base key,PATIENT has one row per patient; use PAT_ID as the original patient identifier.
+PATIENT,BIRTH_DATE,person,birth_datetime,PATIENT.PAT_ID -> PERSON.person_source_value,"Also derive year_of_birth, month_of_birth, and day_of_birth from BIRTH_DATE."
+PATIENT_4,SEX_ASGN_AT_BIRTH_C_NAME,person,gender_source_value,Join to PATIENT by patient context,Use as the source sex-at-birth value feeding OMOP gender_concept_id mapping.
+PATIENT_4,GENDER_IDENTITY_C_NAME,observation,value_source_value,Join back to PERSON via PAT_ID,OMOP gender identity belongs in OBSERVATION rather than PERSON.gender_concept_id.
+PATIENT_RACE,PATIENT_RACE_C_NAME,person,race_source_value,PATIENT_RACE.PAT_ID -> PATIENT.PAT_ID,Multiple race rows may require ETL rules if a patient has more than one race.
+PATIENT,ETHNIC_GROUP_C_NAME,person,ethnicity_source_value,PATIENT.PAT_ID -> PERSON.person_source_value,Use verbatim ethnicity from source; standardize separately to ethnicity_concept_id.
+PATIENT,CUR_PCP_PROV_ID_PROV_NAME,person,provider_id,PATIENT.CUR_PCP_PROV_ID_PROV_NAME <-> provider lookup,Public page exposes PCP name rather than a clean provider ID; local crosswalk may be needed.
+PATIENT,CUR_PRIM_LOC_ID_LOC_NAME,person,care_site_id,PATIENT.CUR_PRIM_LOC_ID_LOC_NAME <-> CLARITY_LOC/DEP lookup,Public page exposes location name rather than a clean care_site key; local crosswalk may be needed.
+PATIENT,CITY,location,city,Build LOCATION row from patient address,Use patient residential city for person-oriented OMOP LOCATION rows.
+PATIENT,STATE_C_NAME,location,state,Build LOCATION row from patient address,Use patient residential state for person-oriented OMOP LOCATION rows.
+PATIENT,ZIP,location,zip,Build LOCATION row from patient address,Use patient residential ZIP for person-oriented OMOP LOCATION rows.
+PATIENT,PAT_ID,person,location_id,PERSON.person_source_value -> derived LOCATION row,"After deduplicating address fields into OMOP LOCATION, link PERSON.location_id to that row."
+SOCIAL_HX,CIGARETTES_YN,observation,value_source_value,SOCIAL_HX.PAT_ENC_CSN_ID -> PAT_ENC.PAT_ENC_CSN_ID -> PAT_ID,Tobacco-use style facts are a common OBSERVATION use case.
+SOCIAL_HX,CONTACT_DATE,observation,observation_date,SOCIAL_HX.PAT_ENC_CSN_ID -> PAT_ENC.PAT_ENC_CSN_ID,Use contact date as the observation date for social history facts.
+PAT_ENC_RSN_VISIT,ENC_REASON_ID_REASON_VISIT_NAME,observation,observation_source_value,PAT_ENC_RSN_VISIT.PAT_ENC_CSN_ID -> PAT_ENC.PAT_ENC_CSN_ID,Reason for visit is commonly loaded to OBSERVATION.
+PAT_ENC_RSN_VISIT,COMMENTS,observation,value_source_value,PAT_ENC_RSN_VISIT.PAT_ENC_CSN_ID -> PAT_ENC.PAT_ENC_CSN_ID,Use free-text reason comments as the verbatim observation result/value where useful.
+CLARITY_SER,PROV_ID,provider,provider_source_value,Base key,Use Epic provider identifier as PROVIDER.provider_source_value.
+CLARITY_SER,PROV_NAME,provider,provider_name,CLARITY_SER.PROV_ID -> PROVIDER.provider_source_value,Use Epic provider name for PROVIDER.provider_name.
+CLARITY_DEP,DEPARTMENT_ID,care_site,care_site_source_value,Base key,CLARITY_DEP is the best public fit for OMOP CARE_SITE.
+CLARITY_DEP,DEPARTMENT_NAME,care_site,care_site_name,CLARITY_DEP.DEPARTMENT_ID -> CARE_SITE.care_site_source_value,Use department name for CARE_SITE.care_site_name.
+CLARITY_LOC,LOC_ID,location,location_source_value,Base key,Use location/facility identifier as LOCATION.location_source_value for facility-oriented rows.
+CLARITY_LOC,LOC_NAME,care_site,place_of_service_source_value,CLARITY_LOC.LOC_ID <-> CLARITY_DEP/CARE_SITE,Public CLARITY_LOC page is better as care-site/location source text than as a full postal address row by itself.
+ORDER_RESULTS,COMPONENT_ID_NAME,measurement,measurement_source_value,ORDER_RESULTS.ORDER_PROC_ID -> ORDER_PROC.ORDER_PROC_ID; PAT_ENC_CSN_ID available,Use result component name as the source measurement value.
+ORDER_RESULTS,RESULT_DATE,measurement,measurement_date,ORDER_RESULTS.ORDER_PROC_ID / PAT_ENC_CSN_ID,Use lab/result date as measurement_date.
+ORDER_RESULTS,ORD_VALUE,measurement,value_source_value,ORDER_RESULTS.ORDER_PROC_ID / PAT_ENC_CSN_ID,Use verbatim result text/value from source.
+ORDER_RESULTS,REFERENCE_UNIT,measurement,unit_source_value,ORDER_RESULTS.ORDER_PROC_ID / PAT_ENC_CSN_ID,Use verbatim result unit from source.
+ORDER_RESULTS,PAT_ENC_CSN_ID,measurement,visit_occurrence_id,ORDER_RESULTS.PAT_ENC_CSN_ID -> VISIT_OCCURRENCE source key,Attach measurement to related visit where applicable.
+V_EHI_FLO_MEAS_EDITED,FLO_MEAS_ID_DISP_NAME,measurement,measurement_source_value,V_EHI_FLO_MEAS_EDITED.FSD_ID + LINE <-> IP_FLWSHT_MEAS.FSD_ID + LINE,Useful for vitals and bedside flowsheet measurements.
+V_EHI_FLO_MEAS_EDITED,MEAS_VALUE_EXTERNAL,measurement,value_source_value,V_EHI_FLO_MEAS_EDITED.FSD_ID + LINE <-> IP_FLWSHT_MEAS.FSD_ID + LINE,Numeric parsing logic can additionally populate value_as_number where applicable.
+V_EHI_FLO_MEAS_EDITED,UNITS,measurement,unit_source_value,V_EHI_FLO_MEAS_EDITED.FSD_ID + LINE <-> IP_FLWSHT_MEAS.FSD_ID + LINE,Use flowsheet unit text from source.
+IP_FLWSHT_MEAS,RECORDED_TIME,measurement,measurement_datetime,IP_FLWSHT_MEAS.FSD_ID + LINE <-> V_EHI_FLO_MEAS_EDITED,Use recorded time as measurement_datetime.
+PAT_ENC_DX,DX_ID_DX_NAME,condition_occurrence,condition_source_value,PAT_ENC_DX.PAT_ENC_CSN_ID -> PAT_ENC.PAT_ENC_CSN_ID,Encounter diagnosis source value.
+PAT_ENC_DX,CONTACT_DATE,condition_occurrence,condition_start_date,PAT_ENC_DX.PAT_ENC_CSN_ID -> PAT_ENC,Use encounter diagnosis contact date as start date when no better onset date exists.
+PAT_ENC_DX,PAT_ENC_CSN_ID,condition_occurrence,visit_occurrence_id,PAT_ENC_DX.PAT_ENC_CSN_ID -> VISIT_OCCURRENCE source key,Direct link from diagnosis to visit.
+PROBLEM_LIST,DX_ID_DX_NAME,condition_occurrence,condition_source_value,Problem-list linkage by local patient/problem joins,Longitudinal problem-list diagnosis source.
+PROBLEM_LIST,NOTED_DATE,condition_occurrence,condition_start_date,Problem-list linkage by local patient/problem joins,Epic says NOTED_DATE is the first possible noted/onset date.
+PATIENT,DEATH_DATE,death,death_date,PATIENT.PAT_ID -> PERSON.person_source_value,Primary internal death date source.
+PATIENT_4,EXTERNAL_DEATH_DATE,death,death_date,PATIENT_4 patient context -> PERSON,Supplemental external death-date source; define source precedence in ETL.
+ORDER_MED,MEDICATION_ID_MEDICATION_NAME,drug_exposure,drug_source_value,ORDER_MED.ORDER_MED_ID base key; PAT_ID and PAT_ENC_CSN_ID available,Source medication representation before RxNorm mapping.
+ORDER_MED,ORDERING_DATE,drug_exposure,drug_exposure_start_date,ORDER_MED.ORDER_MED_ID,Use medication ordering date as exposure start date when order date is the chosen event date.
+ORDER_MED,PAT_ENC_CSN_ID,drug_exposure,visit_occurrence_id,ORDER_MED.PAT_ENC_CSN_ID -> VISIT_OCCURRENCE source key,Attach drug exposure to its encounter where applicable.
+ORDER_MED_SIG,SIG_TEXT,drug_exposure,sig,ORDER_MED_SIG.ORDER_ID = ORDER_MED.ORDER_MED_ID,Patient instructions text for DRUG_EXPOSURE.sig.
+CLARITY_MEDICATION,GENERIC_NAME,drug_exposure,drug_source_value,CLARITY_MEDICATION.MEDICATION_ID <-> local medication key,Useful as medication master reference; direct join from ORDER_MED is not shown on the public page.
+OR_IMP,IMPLANT_NAME,device_exposure,device_source_value,OR_IMP.IMPLANT_ID base key,Verbatim implant/device source value.
+OR_IMP,STATUS_C_NAME,device_exposure,device_type_concept_id / ETL logic,OR_IMP.IMPLANT_ID,Use implant status such as Implanted or Explanted to drive ETL timing/state logic.
+ORDER_PROC,PROC_ID_PROC_NAME,procedure_occurrence,procedure_source_value,ORDER_PROC.ORDER_PROC_ID base key; PAT_ENC_CSN_ID available,Procedure source value from order.
+ORDER_PROC,ORDERING_DATE,procedure_occurrence,procedure_date,ORDER_PROC.ORDER_PROC_ID,Use procedure order date as event date if ETL is order-based.
+ORDER_PROC,PAT_ENC_CSN_ID,procedure_occurrence,visit_occurrence_id,ORDER_PROC.PAT_ENC_CSN_ID -> VISIT_OCCURRENCE source key,Links procedure to encounter.
+PAT_ENC,PAT_ID,observation_period,person_id,PAT_ENC.PAT_ID -> PERSON.person_source_value,EHR observation periods usually must be inferred from activity.
+PAT_ENC,CONTACT_DATE,observation_period,observation_period_start_date,Aggregate MIN(CONTACT_DATE) by PAT_ID,Use earliest qualifying encounter/event date as start.
+ORDER_MED,ORDERING_DATE,observation_period,observation_period_end_date,Aggregate MAX across event tables by PAT_ID,Drug orders are valid candidate events for end-of-observation derivation.
+ORDER_PROC,ORDERING_DATE,observation_period,observation_period_end_date,Aggregate MAX across event tables by PAT_ID,Procedure orders are valid candidate events for end-of-observation derivation.
+ORDER_RESULTS,RESULT_DATE,observation_period,observation_period_end_date,Aggregate MAX across event tables by patient,Lab/result dates are valid candidate events for end-of-observation derivation.
+PAT_ENC_HSP,PAT_ENC_CSN_ID,visit_detail,visit_occurrence_id,PAT_ENC_HSP.PAT_ENC_CSN_ID -> VISIT_OCCURRENCE source key,Primary hospital encounter source for inpatient/ED visit-detail derivation.
+PAT_ENC_HSP,ADT_PAT_CLASS_C_NAME,visit_detail,visit_detail_source_value,PAT_ENC_HSP.PAT_ENC_CSN_ID -> VISIT_OCCURRENCE source key,Use ADT patient class as raw visit-detail type/source value.
+CLARITY_ADT,EVENT_TYPE_C_NAME,visit_detail,visit_detail_source_value,CLARITY_ADT.PAT_ENC_CSN_ID -> PAT_ENC_HSP.PAT_ENC_CSN_ID,Admission/discharge/transfer events are exactly the kind of lower-level hospital movement data VISIT_DETAIL is meant to represent.
+CLARITY_ADT,EFFECTIVE_TIME,visit_detail,visit_detail_start_datetime,CLARITY_ADT.PAT_ENC_CSN_ID -> PAT_ENC_HSP.PAT_ENC_CSN_ID,Use event effective time as the best start timestamp for unit/bed movement detail.
+CLARITY_ADT,BED_ID_BED_LABEL,visit_detail,care_site_id / retained source detail,CLARITY_ADT.PAT_ENC_CSN_ID -> PAT_ENC_HSP.PAT_ENC_CSN_ID,Bed/room values can support sub-visit localization; OMOP has no dedicated bed field.
