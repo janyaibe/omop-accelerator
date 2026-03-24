@@ -14,41 +14,41 @@ flowchart LR
     %% ======================
 
     subgraph TW[TouchWorks]
-        tw_dbo_person[ TW dbo_person ]
-        tw_dbo_person_other[ TW dbo_person_other ]
-        tw_dbo_sex[ TW dbo_sex_de ]
-        tw_dbo_race[ TW dbo_race_de ]
-        tw_dbo_ethnicity[ TW dbo_ethnicity_de ]
+        tw_dbo_person[TW dbo_person]
+        tw_dbo_person_other[TW dbo_person_other]
+        tw_dbo_sex[TW dbo_sex_de]
+        tw_dbo_race[TW dbo_race_de]
+        tw_dbo_ethnicity[TW dbo_ethnicity_de]
 
-        tw_visit[ TW visit ]
-        tw_condition[ TW condition ]
-        tw_drug[ TW drug ]
-        tw_procedure[ TW procedure ]
-        tw_measurement[ TW measurement ]
-        tw_observation[ TW observation ]
+        tw_visit[TW visit]
+        tw_condition[TW condition]
+        tw_drug[TW drug]
+        tw_procedure[TW procedure]
+        tw_measurement[TW measurement]
+        tw_observation[TW observation]
     end
 
     subgraph SCM[SCM]
-        scm_client[ SCM dbo_cv3client ]
+        scm_client[SCM dbo_cv3client]
 
-        scm_visit[ SCM visit ]
-        scm_condition[ SCM condition ]
-        scm_drug[ SCM drug ]
-        scm_procedure[ SCM procedure ]
-        scm_measurement[ SCM measurement ]
-        scm_observation[ SCM observation ]
+        scm_visit[SCM visit]
+        scm_condition[SCM condition]
+        scm_drug[SCM drug]
+        scm_procedure[SCM procedure]
+        scm_measurement[SCM measurement]
+        scm_observation[SCM observation]
     end
 
     subgraph EPIC[Epic]
-        epic_patient[ Epic patient ]
-        epic_patient_race[ Epic patient_race ]
+        epic_patient[Epic patient]
+        epic_patient_race[Epic patient_race]
 
-        epic_visit[ Epic visit ]
-        epic_condition[ Epic condition ]
-        epic_drug[ Epic drug ]
-        epic_procedure[ Epic procedure ]
-        epic_measurement[ Epic measurement ]
-        epic_observation[ Epic observation ]
+        epic_visit[Epic visit]
+        epic_condition[Epic condition]
+        epic_drug[Epic drug]
+        epic_procedure[Epic procedure]
+        epic_measurement[Epic measurement]
+        epic_observation[Epic observation]
     end
 
     %% ======================
@@ -56,9 +56,9 @@ flowchart LR
     %% ======================
 
     subgraph MAP[Mapping Tables]
-        map_domain[ domain_source_to_concept ]
-        map_person[ source_to_person ]
-        map_location[ source_to_location ]
+        map_domain[domain_source_to_concept]
+        map_person[source_to_person]
+        map_location[source_to_location]
     end
 
     %% ======================
@@ -114,96 +114,79 @@ flowchart LR
 
     nb_person --> PERSON
 
-%% ======================
-%% VISIT OCCURRENCE
-%% ======================
+    %% ======================
+    %% VISIT OCCURRENCE
+    %% ======================
 
-%% TW
-tw_dbo_visit[TW dbo_visit]
+    tw_dbo_visit[TW dbo_visit]
+    scm_cv3clientvisit[SCM dbo_cv3clientvisit]
+    epic_pat_enc[EPIC pat_enc]
+    epic_pat_enc_hsp[EPIC pat_enc_hsp]
 
-%% SCM
-scm_cv3clientvisit[SCM dbo_cv3clientvisit]
+    tw_dbo_visit --> nb_visit
+    scm_cv3clientvisit --> nb_visit
+    epic_pat_enc --> nb_visit
+    epic_pat_enc_hsp --> nb_visit
 
-%% EPIC
-epic_pat_enc[EPIC pat_enc]
-epic_pat_enc_hsp[EPIC pat_enc_hsp]
+    map_domain --> nb_visit
+    map_person --> nb_visit
 
-%% Flows
-tw_dbo_visit --> nb_visit
-scm_cv3clientvisit --> nb_visit
-epic_pat_enc --> nb_visit
-epic_pat_enc_hsp --> nb_visit
+    nb_visit --> VISIT_OCCURRENCE
 
-map_domain --> nb_visit
-map_person --> nb_visit
+    %% ======================
+    %% VISIT DETAIL
+    %% ======================
 
-nb_visit --> VISIT_OCCURRENCE
+    tw_visit_detail_encounter[TW dbo_encounter]
+    epic_clarity_adt[EPIC clarity_adt]
 
-%% ======================
-%% VISIT DETAIL
-%% ======================
+    tw_visit_detail_encounter --> nb_visit_detail
+    scm_cv3clientvisit --> nb_visit_detail
+    epic_clarity_adt --> nb_visit_detail
 
-%% TW detail
-tw_dbo_encounter[TW dbo_encounter]
+    map_person --> nb_visit_detail
 
-%% SCM detail
-scm_cv3clientvisit --> nb_visit_detail
+    nb_visit_detail --> VISIT_DETAIL
 
-%% EPIC detail
-epic_clarity_adt[EPIC clarity_adt]
-epic_clarity_adt --> nb_visit_detail
+    %% ======================
+    %% CONDITION OCCURRENCE
+    %% ======================
 
-%% TW detail flow
-tw_dbo_encounter --> nb_visit_detail
+    tw_cond_encounter[TW dbo_encounter]
+    tw_encounter_dx[TW dbo_encounter_diagnosis]
+    tw_icd9[TW dbo_ICD9_Diagnosis_DE]
+    tw_icd10[TW dbo_ICD10_Diagnosis_DE]
+    tw_problem[TW dbo_problem_de]
 
-%% Mapping
-map_person --> nb_visit_detail
+    scm_doc_detail[SCM dbo_cv3clientdocdetail_bkp]
+    scm_doc[SCM dbo_cv3clientdocumentcur]
 
-nb_visit_detail --> VISIT_DETAIL
+    epic_pat_enc_dx[EPIC pat_enc_dx]
+    epic_problem_list[EPIC problem_list]
 
-   %% ======================
-%% CONDITION OCCURRENCE
-%% ======================
+    tw_cond_encounter --> nb_condition
+    tw_encounter_dx --> nb_condition
+    tw_icd9 --> nb_condition
+    tw_icd10 --> nb_condition
+    tw_problem --> nb_condition
 
-%% TW
-tw_encounter[TW dbo_encounter]
-tw_encounter_dx[TW dbo_encounter_diagnosis]
-tw_icd9[TW dbo_ICD9_Diagnosis_DE]
-tw_icd10[TW dbo_ICD10_Diagnosis_DE]
-tw_problem[TW dbo_problem_de]
+    scm_doc_detail --> nb_condition
+    scm_doc --> nb_condition
 
-%% SCM
-scm_doc_detail[SCM dbo_cv3clientdocdetail_bkp]
-scm_doc[SCM dbo_cv3clientdocumentcur]
+    epic_pat_enc_dx --> nb_condition
+    epic_problem_list --> nb_condition
 
-%% EPIC
-epic_pat_enc_dx[EPIC pat_enc_dx]
-epic_problem_list[EPIC problem_list]
+    map_domain --> nb_condition
+    map_person --> nb_condition
 
-%% Flows
-tw_encounter --> nb_condition
-tw_encounter_dx --> nb_condition
-tw_icd9 --> nb_condition
-tw_icd10 --> nb_condition
-tw_problem --> nb_condition
+    nb_condition --> CONDITION_OCCURRENCE
 
-scm_doc_detail --> nb_condition
-scm_doc --> nb_condition
+    %% ======================
+    %% CONDITION ERA
+    %% ======================
 
-epic_pat_enc_dx --> nb_condition
-epic_problem_list --> nb_condition
-
-map_domain --> nb_condition
-map_person --> nb_condition
-
-nb_condition --> CONDITION_OCCURRENCE
-
-%% ======================
-%% CONDITION ERA (DERIVED)
-%% ======================
-
-CONDITION_OCCURRENCE --> nb_condition_era
-nb_condition_era --> CONDITION_ERA
+    CONDITION_OCCURRENCE --> nb_condition_era
+    nb_condition_era --> CONDITION_ERA
 
     %% ======================
     %% DRUG
@@ -240,7 +223,9 @@ nb_condition_era --> CONDITION_ERA
     scm_observation --> nb_obs
     epic_observation --> nb_obs
     nb_obs --> OBSERVATION
-```
+---
+---
+
 ## 2. Clinical Events Tables
 
 Tables that capture clinical events during patient visits.
