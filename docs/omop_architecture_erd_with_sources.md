@@ -19,12 +19,20 @@ flowchart LR
         nb_person[PERSON notebook]
         nb_visit[VISIT_OCCURRENCE notebook]
         nb_condition[CONDITION_OCCURRENCE notebook]
+        nb_drug[DRUG_EXPOSURE notebook]
+        nb_proc[PROCEDURE_OCCURRENCE notebook]
+        nb_meas[MEASUREMENT notebook]
+        nb_obs[OBSERVATION notebook]
     end
 
     subgraph OMOP[OMOP Tables]
         PERSON
         VISIT_OCCURRENCE
         CONDITION_OCCURRENCE
+        DRUG_EXPOSURE
+        PROCEDURE_OCCURRENCE
+        MEASUREMENT
+        OBSERVATION
     end
 
     TW --> nb_person
@@ -41,7 +49,26 @@ flowchart LR
     SCM --> nb_condition
     EPIC --> nb_condition
     nb_condition --> CONDITION_OCCURRENCE
-```
+
+    TW --> nb_drug
+    SCM --> nb_drug
+    EPIC --> nb_drug
+    nb_drug --> DRUG_EXPOSURE
+
+    TW --> nb_proc
+    SCM --> nb_proc
+    EPIC --> nb_proc
+    nb_proc --> PROCEDURE_OCCURRENCE
+
+    TW --> nb_meas
+    SCM --> nb_meas
+    EPIC --> nb_meas
+    nb_meas --> MEASUREMENT
+
+    TW --> nb_obs
+    SCM --> nb_obs
+    EPIC --> nb_obs
+    nb_obs --> OBSERVATION
 
 ---
 
