@@ -35,6 +35,7 @@ subgraph Notebooks
     nb_drug[nb_drug_exposure]
     nb_proc[nb_procedure_occurrence]
     nb_meas[nb_measurement]
+    nb_device[nb_device_exposure]
 end
 
 subgraph OMOP
@@ -45,6 +46,7 @@ subgraph OMOP
     DRUG_EXPOSURE
     PROCEDURE_OCCURRENCE
     MEASUREMENT
+    DEVICE_EXPOSURE
 end
 
 %% ======================
@@ -182,6 +184,36 @@ map_person --> nb_meas
 
 %% -------- OUTPUT --------
 nb_meas --> MEASUREMENT
+
+%% ======================
+%% DEVICE EXPOSURE
+%% ======================
+
+%% -------- TW --------
+tw_charge_device[TW dbo_charge]
+tw_charge_code_device[TW dbo_charge_code_de]
+tw_visit_device[TW dbo_visit]
+
+tw_charge_device --> nb_device
+tw_charge_code_device --> nb_device
+tw_visit_device --> nb_device
+
+%% -------- SCM --------
+scm_device_placeholder[SCM device exposure - not provided yet]
+
+scm_device_placeholder --> nb_device
+
+%% -------- EPIC --------
+epic_or_imp[EPIC or_imp]
+
+epic_or_imp --> nb_device
+
+%% -------- MAPPING --------
+map_domain --> nb_device
+map_person --> nb_device
+
+%% -------- OUTPUT --------
+nb_device --> DEVICE_EXPOSURE
 ```
 
 ## 2. Clinical Events Tables
