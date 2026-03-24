@@ -34,6 +34,9 @@ flowchart LR
     epic_patient --> nb_person
     nb_person --> PERSON
 
+   tw_visit --> nb_visit
+   scm_visit --> nb_visit
+   epic_visit --> nb_visit
    nb_visit --> VISIT_OCCURRENCE
 
     TW --> nb_condition
