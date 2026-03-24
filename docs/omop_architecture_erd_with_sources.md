@@ -112,15 +112,52 @@ flowchart LR
 
     nb_person --> PERSON
 
-    %% ======================
-    %% VISIT
-    %% ======================
+%% ======================
+%% VISIT OCCURRENCE
+%% ======================
 
-    tw_visit --> nb_visit
-    scm_visit --> nb_visit
-    epic_visit --> nb_visit
-    nb_visit --> VISIT_OCCURRENCE
-    nb_visit_detail --> VISIT_DETAIL
+%% TW
+tw_dbo_visit[TW dbo_visit]
+
+%% SCM
+scm_cv3clientvisit[SCM dbo_cv3clientvisit]
+
+%% EPIC
+epic_pat_enc[EPIC pat_enc]
+epic_pat_enc_hsp[EPIC pat_enc_hsp]
+
+%% Flows
+tw_dbo_visit --> nb_visit
+scm_cv3clientvisit --> nb_visit
+epic_pat_enc --> nb_visit
+epic_pat_enc_hsp --> nb_visit
+
+map_domain --> nb_visit
+map_person --> nb_visit
+
+nb_visit --> VISIT_OCCURRENCE
+
+%% ======================
+%% VISIT DETAIL
+%% ======================
+
+%% TW detail
+tw_dbo_encounter[TW dbo_encounter]
+
+%% SCM detail
+scm_cv3clientvisit --> nb_visit_detail
+
+%% EPIC detail
+epic_clarity_adt[EPIC clarity_adt]
+epic_clarity_adt --> nb_visit_detail
+
+%% TW detail flow
+tw_dbo_encounter --> nb_visit_detail
+
+%% Mapping
+map_person --> nb_visit_detail
+
+nb_visit_detail --> VISIT_DETAIL
 
     %% ======================
     %% CONDITION
