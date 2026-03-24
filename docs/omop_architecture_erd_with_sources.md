@@ -70,6 +70,7 @@ flowchart LR
         nb_visit[VISIT_OCCURRENCE notebook]
         nb_visit_detail[VISIT_DETAIL notebook]
         nb_condition[CONDITION_OCCURRENCE notebook]
+        nb_condition_era[CONDITION_ERA notebook]
         nb_drug[DRUG_EXPOSURE notebook]
         nb_proc[PROCEDURE_OCCURRENCE notebook]
         nb_meas[MEASUREMENT notebook]
@@ -85,6 +86,7 @@ flowchart LR
         VISIT_OCCURRENCE
         VISIT_DETAIL
         CONDITION_OCCURRENCE
+        CONDITION_ERA
         DRUG_EXPOSURE
         PROCEDURE_OCCURRENCE
         MEASUREMENT
@@ -159,14 +161,49 @@ map_person --> nb_visit_detail
 
 nb_visit_detail --> VISIT_DETAIL
 
-    %% ======================
-    %% CONDITION
-    %% ======================
+   %% ======================
+%% CONDITION OCCURRENCE
+%% ======================
 
-    tw_condition --> nb_condition
-    scm_condition --> nb_condition
-    epic_condition --> nb_condition
-    nb_condition --> CONDITION_OCCURRENCE
+%% TW
+tw_encounter[TW dbo_encounter]
+tw_encounter_dx[TW dbo_encounter_diagnosis]
+tw_icd9[TW dbo_ICD9_Diagnosis_DE]
+tw_icd10[TW dbo_ICD10_Diagnosis_DE]
+tw_problem[TW dbo_problem_de]
+
+%% SCM
+scm_doc_detail[SCM dbo_cv3clientdocdetail_bkp]
+scm_doc[SCM dbo_cv3clientdocumentcur]
+
+%% EPIC
+epic_pat_enc_dx[EPIC pat_enc_dx]
+epic_problem_list[EPIC problem_list]
+
+%% Flows
+tw_encounter --> nb_condition
+tw_encounter_dx --> nb_condition
+tw_icd9 --> nb_condition
+tw_icd10 --> nb_condition
+tw_problem --> nb_condition
+
+scm_doc_detail --> nb_condition
+scm_doc --> nb_condition
+
+epic_pat_enc_dx --> nb_condition
+epic_problem_list --> nb_condition
+
+map_domain --> nb_condition
+map_person --> nb_condition
+
+nb_condition --> CONDITION_OCCURRENCE
+
+%% ======================
+%% CONDITION ERA (DERIVED)
+%% ======================
+
+CONDITION_OCCURRENCE --> nb_condition_era
+nb_condition_era --> CONDITION_ERA
 
     %% ======================
     %% DRUG
