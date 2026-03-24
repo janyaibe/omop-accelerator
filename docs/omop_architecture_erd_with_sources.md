@@ -9,13 +9,7 @@ This document contains ERDs for the OMOP Common Data Model v5.4, organized by ca
 ```mermaid
 flowchart LR
 
-    subgraph SOURCES[Source Systems]
-        TW[TouchWorks]
-        SCM[SCM Sunrise]
-        EPIC[Epic Clarity]
-    end
-
-    subgraph DBX[Databricks Hydration Notebooks]
+   subgraph DBX[Databricks Hydration Notebooks]
         nb_person[PERSON notebook]
         nb_visit[VISIT_OCCURRENCE notebook]
         nb_condition[CONDITION_OCCURRENCE notebook]
@@ -40,10 +34,7 @@ flowchart LR
     epic_patient --> nb_person
     nb_person --> PERSON
 
-    TW --> nb_visit
-    SCM --> nb_visit
-    EPIC --> nb_visit
-    nb_visit --> VISIT_OCCURRENCE
+   nb_visit --> VISIT_OCCURRENCE
 
     TW --> nb_condition
     SCM --> nb_condition
