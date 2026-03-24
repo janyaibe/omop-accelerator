@@ -38,6 +38,7 @@ subgraph Notebooks
     nb_device[nb_device_exposure]
     nb_death[nb_death]
     nb_note[nb_note]
+    nb_provider[nb_provider]
 end
 
 subgraph OMOP
@@ -51,6 +52,7 @@ subgraph OMOP
     DEVICE_EXPOSURE
     DEATH
     NOTE
+    PROVIDER
 end
 
 %% ======================
@@ -282,6 +284,39 @@ map_person --> nb_note
 
 %% -------- OUTPUT --------
 nb_note --> NOTE
+
+%% ======================
+%% PROVIDER
+%% ======================
+
+%% -------- TW --------
+tw_provider[TW dbo_provider]
+tw_person_provider[TW dbo_person]
+tw_sex[TW dbo_sex_de]
+tw_specialty[TW dbo_specialty_de]
+
+tw_provider --> nb_provider
+tw_person_provider --> nb_provider
+tw_sex --> nb_provider
+tw_specialty --> nb_provider
+
+%% -------- SCM --------
+scm_careprovider[SCM dbo_cv3careprovider]
+scm_careproviderid[SCM dbo_cv3careproviderid]
+
+scm_careprovider --> nb_provider
+scm_careproviderid --> nb_provider
+
+%% -------- EPIC --------
+epic_clarity_ser[EPIC clarity_ser]
+
+epic_clarity_ser --> nb_provider
+
+%% -------- MAPPING --------
+map_domain --> nb_provider
+
+%% -------- OUTPUT --------
+nb_provider --> PROVIDER
 ```
 
 ## 2. Clinical Events Tables
