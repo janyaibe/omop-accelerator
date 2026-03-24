@@ -37,6 +37,7 @@ subgraph Notebooks
     nb_meas[nb_measurement]
     nb_device[nb_device_exposure]
     nb_death[nb_death]
+    nb_note[nb_note]
 end
 
 subgraph OMOP
@@ -49,6 +50,7 @@ subgraph OMOP
     MEASUREMENT
     DEVICE_EXPOSURE
     DEATH
+    NOTE
 end
 
 %% ======================
@@ -243,6 +245,43 @@ map_person --> nb_death
 
 %% -------- OUTPUT --------
 nb_death --> DEATH
+
+%% ======================
+%% NOTE
+%% ======================
+
+%% -------- TW --------
+tw_oah[TW dbo_order_activity_header]
+tw_order_mapper[TW dbo_order_result_mapper]
+tw_result_text[TW dbo_result_text]
+
+tw_oah --> nb_note
+tw_order_mapper --> nb_note
+tw_result_text --> nb_note
+
+%% -------- SCM --------
+scm_obs_note[SCM dbo_scaobservation]
+scm_doc[SCM dbo_scadocument]
+scm_docdim[SCM dbo_scadocumentdim]
+scm_client_note[SCM dbo_cv3client]
+
+scm_obs_note --> nb_note
+scm_doc --> nb_note
+scm_docdim --> nb_note
+scm_client_note --> nb_note
+
+%% -------- EPIC --------
+epic_hno[EPIC hno_info]
+epic_note_type[EPIC zc_note_type_ip]
+
+epic_hno --> nb_note
+epic_note_type --> nb_note
+
+%% -------- MAPPING --------
+map_person --> nb_note
+
+%% -------- OUTPUT --------
+nb_note --> NOTE
 ```
 
 ## 2. Clinical Events Tables
