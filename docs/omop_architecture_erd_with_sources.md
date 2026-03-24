@@ -4,6 +4,44 @@ This document contains ERDs for the OMOP Common Data Model v5.4, organized by ca
 
 ---
 
+## 0. Databricks Hydration Flow (Source → OMOP)
+
+```mermaid
+flowchart LR
+
+    subgraph SOURCES[Source Systems]
+        TW[TouchWorks]
+        SCM[SCM (Sunrise)]
+        EPIC[Epic Clarity]
+    end
+
+    subgraph DBX[Databricks Hydration Notebooks]
+        nb_person[person notebook]
+        nb_visit[visit_occurrence notebook]
+        nb_condition[condition_occurrence notebook]
+    end
+
+    subgraph OMOP[OMOP Tables]
+        PERSON
+        VISIT_OCCURRENCE
+        CONDITION_OCCURRENCE
+    end
+
+    TW --> nb_person
+    SCM --> nb_person
+    EPIC --> nb_person
+    nb_person --> PERSON
+
+    TW --> nb_visit
+    SCM --> nb_visit
+    EPIC --> nb_visit
+    nb_visit --> VISIT_OCCURRENCE
+
+    TW --> nb_condition
+    SCM --> nb_condition
+    EPIC --> nb_condition
+    nb_condition --> CONDITION_OCCURRENCE
+
 ## 1. Clinical Data Tables (Core)
 
 The central tables for patient clinical data, with PERSON as the root entity.
