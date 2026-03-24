@@ -77,17 +77,38 @@ nb_obs --> OBSERVATION
 %% DRUG EXPOSURE
 %% ======================
 
-tw_drug_src[TW <replace_tables>]
-scm_drug_src[SCM <replace_tables>]
-epic_drug_src[EPIC <replace_tables>]
+%% -------- TW --------
+tw_medication[TW dbo_medication]
+tw_medication_de[TW dbo_medication_de]
+tw_item_medication[TW dbo_item_medication]
 
-tw_drug_src --> nb_drug
-scm_drug_src --> nb_drug
-epic_drug_src --> nb_drug
+tw_medication --> nb_drug
+tw_medication_de --> nb_drug
+tw_item_medication --> nb_drug
 
+%% -------- SCM --------
+scm_order[SCM dbo_cv3order (Medication)]
+scm_medext[SCM dbo_cv3medicationextension]
+scm_generic[SCM dbo_sxammgenericitem (RxNorm)]
+
+scm_order --> nb_drug
+scm_medext --> nb_drug
+scm_generic --> nb_drug
+
+%% -------- EPIC --------
+epic_order_med[EPIC ORDER_MED]
+epic_med_sig[EPIC ORDER_MED_SIG]
+epic_med_master[EPIC CLARITY_MEDICATION]
+
+epic_order_med --> nb_drug
+epic_med_sig --> nb_drug
+epic_med_master --> nb_drug
+
+%% -------- MAPPING --------
 map_domain --> nb_drug
 map_person --> nb_drug
 
+%% -------- OUTPUT --------
 nb_drug --> DRUG_EXPOSURE
 ```
 
