@@ -9,222 +9,87 @@ This document contains ERDs for the OMOP Common Data Model v5.4, organized by ca
 ```mermaid
 flowchart LR
 
-    %% ======================
-    %% SOURCE SYSTEMS
-    %% ======================
+%% ======================
+%% 1. CORE TABLES
+%% ======================
 
-    subgraph TW[TouchWorks]
-        tw_dbo_person[TW dbo_person]
-        tw_dbo_person_other[TW dbo_person_other]
-        tw_dbo_sex[TW dbo_sex_de]
-        tw_dbo_race[TW dbo_race_de]
-        tw_dbo_ethnicity[TW dbo_ethnicity_de]
+subgraph Source_Systems
+    tw_person[TW PERSON]
+    scm_person[SCM PERSON]
+    epic_person[EPIC PERSON]
 
-        tw_visit[TW visit]
-        tw_condition[TW condition]
-        tw_drug[TW drug]
-        tw_procedure[TW procedure]
-        tw_measurement[TW measurement]
-        tw_observation[TW observation]
-    end
+    tw_visit[TW VISIT]
+    scm_visit[SCM VISIT]
+    epic_visit[EPIC VISIT]
+end
 
-    subgraph SCM[SCM]
-        scm_client[SCM dbo_cv3client]
+subgraph Mapping_Tables
+    map_person[PERSON MAPPING]
+    map_domain[DOMAIN MAPPING]
+end
 
-        scm_visit[SCM visit]
-        scm_condition[SCM condition]
-        scm_drug[SCM drug]
-        scm_procedure[SCM procedure]
-        scm_measurement[SCM measurement]
-        scm_observation[SCM observation]
-    end
+subgraph Notebooks
+    nb_person[nb_person]
+    nb_visit[nb_visit]
+    nb_obs[nb_observation]
+    nb_drug[nb_drug_exposure]
+end
 
-    subgraph EPIC[Epic]
-        epic_patient[Epic patient]
-        epic_patient_race[Epic patient_race]
+subgraph OMOP
+    PERSON
+    VISIT_OCCURRENCE
+    VISIT_DETAIL
+    OBSERVATION
+    DRUG_EXPOSURE
+end
 
-        epic_visit[Epic visit]
-        epic_condition[Epic condition]
-        epic_drug[Epic drug]
-        epic_procedure[Epic procedure]
-        epic_measurement[Epic measurement]
-        epic_observation[Epic observation]
-    end
+%% ======================
+%% PERSON
+%% ======================
 
-    %% ======================
-    %% MAPPING TABLES
-    %% ======================
+tw_person --> nb_person
+scm_person --> nb_person
+epic_person --> nb_person
+map_person --> nb_person
+nb_person --> PERSON
 
-    subgraph MAP[Mapping Tables]
-        map_domain[domain_source_to_concept]
-        map_person[source_to_person]
-        map_location[source_to_location]
-    end
+%% ======================
+%% VISIT
+%% ======================
 
-    %% ======================
-    %% NOTEBOOKS
-    %% ======================
+tw_visit --> nb_visit
+scm_visit --> nb_visit
+epic_visit --> nb_visit
+nb_visit --> VISIT_OCCURRENCE
+nb_visit --> VISIT_DETAIL
 
-    subgraph DBX[Databricks Hydration Notebooks]
-        nb_person[PERSON notebook]
-        nb_visit[VISIT_OCCURRENCE notebook]
-        nb_visit_detail[VISIT_DETAIL notebook]
-        nb_condition[CONDITION_OCCURRENCE notebook]
-        nb_condition_era[CONDITION_ERA notebook]
-        nb_drug[DRUG_EXPOSURE notebook]
-        nb_proc[PROCEDURE_OCCURRENCE notebook]
-        nb_meas[MEASUREMENT notebook]
-        nb_obs[OBSERVATION notebook]
-    end
+%% ======================
+%% OBSERVATION
+%% ======================
 
-    %% ======================
-    %% OMOP TARGETS
-    %% ======================
+tw_visit --> nb_obs
+scm_visit --> nb_obs
+epic_visit --> nb_obs
+map_domain --> nb_obs
+nb_obs --> OBSERVATION
 
-    subgraph OMOP[OMOP Tables]
-        PERSON
-        VISIT_OCCURRENCE
-        VISIT_DETAIL
-        CONDITION_OCCURRENCE
-        CONDITION_ERA
-        DRUG_EXPOSURE
-        PROCEDURE_OCCURRENCE
-        MEASUREMENT
-        OBSERVATION
-    end
+%% ======================
+%% DRUG EXPOSURE
+%% ======================
 
-    %% ======================
-    %% PERSON FLOW
-    %% ======================
+tw_drug_src[TW <replace_tables>]
+scm_drug_src[SCM <replace_tables>]
+epic_drug_src[EPIC <replace_tables>]
 
-    tw_dbo_person --> nb_person
-    tw_dbo_person_other --> nb_person
-    tw_dbo_sex --> nb_person
-    tw_dbo_race --> nb_person
-    tw_dbo_ethnicity --> nb_person
+tw_drug_src --> nb_drug
+scm_drug_src --> nb_drug
+epic_drug_src --> nb_drug
 
-    scm_client --> nb_person
+map_domain --> nb_drug
+map_person --> nb_drug
 
-    epic_patient --> nb_person
-    epic_patient_race --> nb_person
-
-    map_domain --> nb_person
-    map_location --> nb_person
-    map_person --> nb_person
-
-    nb_person --> PERSON
-
-    %% ======================
-    %% VISIT OCCURRENCE
-    %% ======================
-
-    tw_dbo_visit[TW dbo_visit]
-    scm_cv3clientvisit[SCM dbo_cv3clientvisit]
-    epic_pat_enc[EPIC pat_enc]
-    epic_pat_enc_hsp[EPIC pat_enc_hsp]
-
-    tw_dbo_visit --> nb_visit
-    scm_cv3clientvisit --> nb_visit
-    epic_pat_enc --> nb_visit
-    epic_pat_enc_hsp --> nb_visit
-
-    map_domain --> nb_visit
-    map_person --> nb_visit
-
-    nb_visit --> VISIT_OCCURRENCE
-
-    %% ======================
-    %% VISIT DETAIL
-    %% ======================
-
-    tw_visit_detail_encounter[TW dbo_encounter]
-    epic_clarity_adt[EPIC clarity_adt]
-
-    tw_visit_detail_encounter --> nb_visit_detail
-    scm_cv3clientvisit --> nb_visit_detail
-    epic_clarity_adt --> nb_visit_detail
-
-    map_person --> nb_visit_detail
-
-    nb_visit_detail --> VISIT_DETAIL
-
-    %% ======================
-    %% CONDITION OCCURRENCE
-    %% ======================
-
-    tw_cond_encounter[TW dbo_encounter]
-    tw_encounter_dx[TW dbo_encounter_diagnosis]
-    tw_icd9[TW dbo_ICD9_Diagnosis_DE]
-    tw_icd10[TW dbo_ICD10_Diagnosis_DE]
-    tw_problem[TW dbo_problem_de]
-
-    scm_doc_detail[SCM dbo_cv3clientdocdetail_bkp]
-    scm_doc[SCM dbo_cv3clientdocumentcur]
-
-    epic_pat_enc_dx[EPIC pat_enc_dx]
-    epic_problem_list[EPIC problem_list]
-
-    tw_cond_encounter --> nb_condition
-    tw_encounter_dx --> nb_condition
-    tw_icd9 --> nb_condition
-    tw_icd10 --> nb_condition
-    tw_problem --> nb_condition
-
-    scm_doc_detail --> nb_condition
-    scm_doc --> nb_condition
-
-    epic_pat_enc_dx --> nb_condition
-    epic_problem_list --> nb_condition
-
-    map_domain --> nb_condition
-    map_person --> nb_condition
-
-    nb_condition --> CONDITION_OCCURRENCE
-
-    %% ======================
-    %% CONDITION ERA
-    %% ======================
-
-    CONDITION_OCCURRENCE --> nb_condition_era
-    nb_condition_era --> CONDITION_ERA
-
-    %% ======================
-    %% DRUG
-    %% ======================
-
-    tw_drug --> nb_drug
-    scm_drug --> nb_drug
-    epic_drug --> nb_drug
-    nb_drug --> DRUG_EXPOSURE
-
-    %% ======================
-    %% PROCEDURE
-    %% ======================
-
-    tw_procedure --> nb_proc
-    scm_procedure --> nb_proc
-    epic_procedure --> nb_proc
-    nb_proc --> PROCEDURE_OCCURRENCE
-
-    %% ======================
-    %% MEASUREMENT
-    %% ======================
-
-    tw_measurement --> nb_meas
-    scm_measurement --> nb_meas
-    epic_measurement --> nb_meas
-    nb_meas --> MEASUREMENT
-
-    %% ======================
-    %% OBSERVATION
-    %% ======================
-
-    tw_observation --> nb_obs
-    scm_observation --> nb_obs
-    epic_observation --> nb_obs
-    nb_obs --> OBSERVATION
----
----
+nb_drug --> DRUG_EXPOSURE
+```
 
 ## 2. Clinical Events Tables
 
