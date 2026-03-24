@@ -78,18 +78,18 @@ nb_obs --> OBSERVATION
 %% ======================
 
 %% -------- TW --------
-tw_medication[TW dbo_medication]
-tw_medication_de[TW dbo_medication_de]
-tw_item_medication[TW dbo_item_medication]
+tw_med[TW dbo_medication]
+tw_med_de[TW dbo_medication_de]
+tw_item_med[TW dbo_item_medication]
 
-tw_medication --> nb_drug
-tw_medication_de --> nb_drug
-tw_item_medication --> nb_drug
+tw_med --> nb_drug
+tw_med_de --> nb_drug
+tw_item_med --> nb_drug
 
 %% -------- SCM --------
-scm_order[SCM dbo_cv3order (Medication)]
+scm_order[SCM dbo_cv3order - Medication]
 scm_medext[SCM dbo_cv3medicationextension]
-scm_generic[SCM dbo_sxammgenericitem (RxNorm)]
+scm_generic[SCM dbo_sxammgenericitem - RxNorm]
 
 scm_order --> nb_drug
 scm_medext --> nb_drug
