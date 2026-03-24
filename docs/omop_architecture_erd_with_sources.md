@@ -35,9 +35,9 @@ flowchart LR
         OBSERVATION
     end
 
-    TW --> nb_person
-    SCM --> nb_person
-    EPIC --> nb_person
+    tw_patient --> nb_person
+    scm_patient --> nb_person
+    epic_patient --> nb_person
     nb_person --> PERSON
 
     TW --> nb_visit
