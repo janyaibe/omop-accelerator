@@ -16,9 +16,9 @@ flowchart LR
     end
 
     subgraph DBX[Databricks Hydration Notebooks]
-        nb_person[person notebook]
-        nb_visit[visit_occurrence notebook]
-        nb_condition[condition_occurrence notebook]
+        nb_person[PERSON notebook]
+        nb_visit[VISIT_OCCURRENCE notebook]
+        nb_condition[CONDITION_OCCURRENCE notebook]
     end
 
     subgraph OMOP[OMOP Tables]
