@@ -9,7 +9,63 @@ This document contains ERDs for the OMOP Common Data Model v5.4, organized by ca
 ```mermaid
 flowchart LR
 
-   subgraph DBX[Databricks Hydration Notebooks]
+    %% ======================
+    %% SOURCE SYSTEMS
+    %% ======================
+
+    subgraph TW[TouchWorks]
+        tw_dbo_person[ TW dbo_person ]
+        tw_dbo_person_other[ TW dbo_person_other ]
+        tw_dbo_sex[ TW dbo_sex_de ]
+        tw_dbo_race[ TW dbo_race_de ]
+        tw_dbo_ethnicity[ TW dbo_ethnicity_de ]
+
+        tw_visit[ TW visit ]
+        tw_condition[ TW condition ]
+        tw_drug[ TW drug ]
+        tw_procedure[ TW procedure ]
+        tw_measurement[ TW measurement ]
+        tw_observation[ TW observation ]
+    end
+
+    subgraph SCM[SCM]
+        scm_client[ SCM dbo_cv3client ]
+
+        scm_visit[ SCM visit ]
+        scm_condition[ SCM condition ]
+        scm_drug[ SCM drug ]
+        scm_procedure[ SCM procedure ]
+        scm_measurement[ SCM measurement ]
+        scm_observation[ SCM observation ]
+    end
+
+    subgraph EPIC[Epic]
+        epic_patient[ Epic patient ]
+        epic_patient_race[ Epic patient_race ]
+
+        epic_visit[ Epic visit ]
+        epic_condition[ Epic condition ]
+        epic_drug[ Epic drug ]
+        epic_procedure[ Epic procedure ]
+        epic_measurement[ Epic measurement ]
+        epic_observation[ Epic observation ]
+    end
+
+    %% ======================
+    %% MAPPING TABLES
+    %% ======================
+
+    subgraph MAP[Mapping Tables]
+        map_domain[ domain_source_to_concept ]
+        map_person[ source_to_person ]
+        map_location[ source_to_location ]
+    end
+
+    %% ======================
+    %% NOTEBOOKS
+    %% ======================
+
+    subgraph DBX[Databricks Hydration Notebooks]
         nb_person[PERSON notebook]
         nb_visit[VISIT_OCCURRENCE notebook]
         nb_condition[CONDITION_OCCURRENCE notebook]
@@ -18,6 +74,10 @@ flowchart LR
         nb_meas[MEASUREMENT notebook]
         nb_obs[OBSERVATION notebook]
     end
+
+    %% ======================
+    %% OMOP TARGETS
+    %% ======================
 
     subgraph OMOP[OMOP Tables]
         PERSON
@@ -29,74 +89,81 @@ flowchart LR
         OBSERVATION
     end
 
-    %% TouchWorks
-tw_dbo_person[dbo_person]
-tw_dbo_person_other[dbo_person_other]
-tw_dbo_sex[dbo_sex_de]
-tw_dbo_race[dbo_race_de]
-tw_dbo_ethnicity[dbo_ethnicity_de]
+    %% ======================
+    %% PERSON FLOW
+    %% ======================
 
-%% SCM
-scm_client[dbo_cv3client]
+    tw_dbo_person --> nb_person
+    tw_dbo_person_other --> nb_person
+    tw_dbo_sex --> nb_person
+    tw_dbo_race --> nb_person
+    tw_dbo_ethnicity --> nb_person
 
-%% Epic
-epic_patient[patient]
-epic_patient_race[patient_race]
+    scm_client --> nb_person
 
-%% Mapping tables
-map_domain[domain_source_to_concept]
-map_person[source_to_person]
-map_location[source_to_location]
+    epic_patient --> nb_person
+    epic_patient_race --> nb_person
 
-%% TouchWorks flow
-tw_dbo_person --> nb_person
-tw_dbo_person_other --> nb_person
-tw_dbo_sex --> nb_person
-tw_dbo_race --> nb_person
-tw_dbo_ethnicity --> nb_person
+    map_domain --> nb_person
+    map_location --> nb_person
+    map_person --> nb_person
 
-%% SCM flow
-scm_client --> nb_person
+    nb_person --> PERSON
 
-%% Epic flow
-epic_patient --> nb_person
-epic_patient_race --> nb_person
+    %% ======================
+    %% VISIT
+    %% ======================
 
-%% Mapping joins
-map_domain --> nb_person
-map_location --> nb_person
-map_person --> nb_person
-nb_person --> PERSON
+    tw_visit --> nb_visit
+    scm_visit --> nb_visit
+    epic_visit --> nb_visit
+    nb_visit --> VISIT_OCCURRENCE
 
-   tw_visit --> nb_visit
-   scm_visit --> nb_visit
-   epic_visit --> nb_visit
-   nb_visit --> VISIT_OCCURRENCE
+    %% ======================
+    %% CONDITION
+    %% ======================
 
-   tw_condition --> nb_condition
-   scm_condition --> nb_condition
-   epic_condition --> nb_condition
-   nb_condition --> CONDITION_OCCURRENCE
+    tw_condition --> nb_condition
+    scm_condition --> nb_condition
+    epic_condition --> nb_condition
+    nb_condition --> CONDITION_OCCURRENCE
 
-   tw_drug --> nb_drug
-   scm_drug --> nb_drug
-   epic_drug --> nb_drug
-   nb_drug --> DRUG_EXPOSURE
+    %% ======================
+    %% DRUG
+    %% ======================
 
-   tw_procedure --> nb_proc
-   scm_procedure --> nb_proc
-   epic_procedure --> nb_proc
-   nb_proc --> PROCEDURE_OCCURRENCE
+    tw_drug --> nb_drug
+    scm_drug --> nb_drug
+    epic_drug --> nb_drug
+    nb_drug --> DRUG_EXPOSURE
 
-   tw_measurement --> nb_meas
-   scm_measurement --> nb_meas
-   epic_measurement --> nb_meas
-   nb_meas --> MEASUREMENT
+    %% ======================
+    %% PROCEDURE
+    %% ======================
 
-   tw_observation --> nb_obs
-   scm_observation --> nb_obs
-   epic_observation --> nb_obs
-   nb_obs --> OBSERVATION
+    tw_procedure --> nb_proc
+    scm_procedure --> nb_proc
+    epic_procedure --> nb_proc
+    nb_proc --> PROCEDURE_OCCURRENCE
+
+    %% ======================
+    %% MEASUREMENT
+    %% ======================
+
+    tw_measurement --> nb_meas
+    scm_measurement --> nb_meas
+    epic_measurement --> nb_meas
+    nb_meas --> MEASUREMENT
+
+    %% ======================
+    %% OBSERVATION
+    %% ======================
+
+    tw_observation --> nb_obs
+    scm_observation --> nb_obs
+    epic_observation --> nb_obs
+    nb_obs --> OBSERVATION
+```
 ```
 ## 2. Clinical Events Tables
 
@@ -208,8 +275,6 @@ erDiagram
     PERSON ||--o{ OBSERVATION : has
     PERSON ||--o{ DEVICE_EXPOSURE : has
 ```
-
----
 
 ## 3. Notes and Specimens
 
