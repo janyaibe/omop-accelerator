@@ -164,7 +164,6 @@ flowchart LR
     epic_observation --> nb_obs
     nb_obs --> OBSERVATION
 ```
-```
 ## 2. Clinical Events Tables
 
 Tables that capture clinical events during patient visits.
