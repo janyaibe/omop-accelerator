@@ -11,7 +11,7 @@ flowchart LR
 
     subgraph SOURCES[Source Systems]
         TW[TouchWorks]
-        SCM[SCM (Sunrise)]
+        SCM[SCM Sunrise]
         EPIC[Epic Clarity]
     end
 
