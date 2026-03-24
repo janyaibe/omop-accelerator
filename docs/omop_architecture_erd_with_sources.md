@@ -39,6 +39,7 @@ subgraph Notebooks
     nb_death[nb_death]
     nb_note[nb_note]
     nb_provider[nb_provider]
+    nb_location[nb_location]
 end
 
 subgraph OMOP
@@ -53,6 +54,7 @@ subgraph OMOP
     DEATH
     NOTE
     PROVIDER
+    LOCATION
 end
 
 %% ======================
@@ -317,6 +319,31 @@ map_domain --> nb_provider
 
 %% -------- OUTPUT --------
 nb_provider --> PROVIDER
+
+%% ======================
+%% LOCATION
+%% ======================
+
+%% -------- TW --------
+tw_person_address[TW dbo_person_address]
+
+tw_person_address --> nb_location
+
+%% -------- SCM --------
+scm_address[SCM dbo_cv3address]
+
+scm_address --> nb_location
+
+%% -------- EPIC --------
+epic_patient_addr[EPIC patient]
+
+epic_patient_addr --> nb_location
+
+%% -------- MAPPING --------
+map_domain --> nb_location
+
+%% -------- OUTPUT --------
+nb_location --> LOCATION
 ```
 
 ## 2. Clinical Events Tables
