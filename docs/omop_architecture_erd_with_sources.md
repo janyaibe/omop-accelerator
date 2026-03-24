@@ -36,6 +36,7 @@ subgraph Notebooks
     nb_proc[nb_procedure_occurrence]
     nb_meas[nb_measurement]
     nb_device[nb_device_exposure]
+    nb_death[nb_death]
 end
 
 subgraph OMOP
@@ -47,6 +48,7 @@ subgraph OMOP
     PROCEDURE_OCCURRENCE
     MEASUREMENT
     DEVICE_EXPOSURE
+    DEATH
 end
 
 %% ======================
@@ -214,6 +216,33 @@ map_person --> nb_device
 
 %% -------- OUTPUT --------
 nb_device --> DEVICE_EXPOSURE
+
+%% ======================
+%% DEATH
+%% ======================
+
+%% -------- TW --------
+tw_person[TW dbo_person]
+tw_person_other[TW dbo_person_other]
+
+tw_person --> nb_death
+tw_person_other --> nb_death
+
+%% -------- SCM --------
+scm_client[SCM dbo_cv3client]
+
+scm_client --> nb_death
+
+%% -------- EPIC --------
+epic_patient[EPIC patient]
+
+epic_patient --> nb_death
+
+%% -------- MAPPING --------
+map_person --> nb_death
+
+%% -------- OUTPUT --------
+nb_death --> DEATH
 ```
 
 ## 2. Clinical Events Tables
