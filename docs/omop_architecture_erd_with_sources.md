@@ -29,10 +29,43 @@ flowchart LR
         OBSERVATION
     end
 
-    tw_patient --> nb_person
-    scm_patient --> nb_person
-    epic_patient --> nb_person
-    nb_person --> PERSON
+    %% TouchWorks
+tw_dbo_person[dbo_person]
+tw_dbo_person_other[dbo_person_other]
+tw_dbo_sex[dbo_sex_de]
+tw_dbo_race[dbo_race_de]
+tw_dbo_ethnicity[dbo_ethnicity_de]
+
+%% SCM
+scm_client[dbo_cv3client]
+
+%% Epic
+epic_patient[patient]
+epic_patient_race[patient_race]
+
+%% Mapping tables
+map_domain[domain_source_to_concept]
+map_person[source_to_person]
+map_location[source_to_location]
+
+%% TouchWorks flow
+tw_dbo_person --> nb_person
+tw_dbo_person_other --> nb_person
+tw_dbo_sex --> nb_person
+tw_dbo_race --> nb_person
+tw_dbo_ethnicity --> nb_person
+
+%% SCM flow
+scm_client --> nb_person
+
+%% Epic flow
+epic_patient --> nb_person
+epic_patient_race --> nb_person
+
+%% Mapping joins
+map_domain --> nb_person
+map_location --> nb_person
+map_person --> nb_person
 
    tw_visit --> nb_visit
    scm_visit --> nb_visit
