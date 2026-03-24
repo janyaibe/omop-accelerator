@@ -4,7 +4,7 @@ This document contains ERDs for the OMOP Common Data Model v5.4, organized by ca
 
 ---
 
-## 0. Databricks Hydration Flow (Source → OMOP)
+## 1. Databricks Hydration Flow (Source → OMOP)
 
 ```mermaid
 flowchart LR
