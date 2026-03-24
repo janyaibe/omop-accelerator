@@ -40,6 +40,7 @@ subgraph Notebooks
     nb_note[nb_note]
     nb_provider[nb_provider]
     nb_location[nb_location]
+    nb_care_site[nb_care_site]
 end
 
 subgraph OMOP
@@ -55,6 +56,7 @@ subgraph OMOP
     NOTE
     PROVIDER
     LOCATION
+    CARE_SITE
 end
 
 %% ======================
@@ -344,6 +346,39 @@ map_domain --> nb_location
 
 %% -------- OUTPUT --------
 nb_location --> LOCATION
+
+%% ======================
+%% CARE SITE
+%% ======================
+
+%% -------- TW --------
+tw_billing_loc[TW dbo_billing_location_de]
+tw_location_de[TW dbo_location_de]
+tw_site_de[TW dbo_site_de]
+tw_site_loc[TW dbo_site_location_de]
+
+tw_billing_loc --> nb_care_site
+tw_location_de --> nb_care_site
+tw_site_de --> nb_care_site
+tw_site_loc --> nb_care_site
+
+%% -------- SCM --------
+scm_location_cs[SCM dbo_cv3location]
+
+scm_location_cs --> nb_care_site
+
+%% -------- EPIC --------
+epic_dep[EPIC clarity_dep]
+epic_loc[EPIC clarity_loc]
+
+epic_dep --> nb_care_site
+epic_loc --> nb_care_site
+
+%% -------- MAPPING --------
+map_domain --> nb_care_site
+
+%% -------- OUTPUT --------
+nb_care_site --> CARE_SITE
 ```
 
 ## 2. Clinical Events Tables
