@@ -18,38 +18,29 @@ subgraph Source_Systems
     subgraph TW
         tw_person[TW PERSON]
         tw_visit[TW VISIT]
-
         tw_med[TW dbo_medication]
         tw_med_de[TW dbo_medication_de]
         tw_item_med[TW dbo_item_medication]
-
         tw_charge[TW dbo_charge]
         tw_charge_code[TW dbo_charge_code_de]
         tw_item_result_proc[TW dbo_item_result]
         tw_order_activity[TW dbo_order_activity_header]
-
         tw_item_result_meas[TW dbo_item_result]
         tw_result[TW dbo_result]
         tw_order_activity_meas[TW dbo_order_activity_header]
-
         tw_charge_device[TW dbo_charge]
         tw_charge_code_device[TW dbo_charge_code_de]
         tw_visit_device[TW dbo_visit]
-
         tw_person_death[TW dbo_person]
         tw_person_other[TW dbo_person_other]
-
         tw_oah[TW dbo_order_activity_header]
         tw_order_mapper[TW dbo_order_result_mapper]
         tw_result_text[TW dbo_result_text]
-
         tw_provider[TW dbo_provider]
         tw_person_provider[TW dbo_person]
         tw_sex[TW dbo_sex_de]
         tw_specialty[TW dbo_specialty_de]
-
         tw_person_address[TW dbo_person_address]
-
         tw_billing_loc[TW dbo_billing_location_de]
         tw_location_de[TW dbo_location_de]
         tw_site_de[TW dbo_site_de]
@@ -59,150 +50,93 @@ subgraph Source_Systems
     subgraph SCM
         scm_person[SCM PERSON]
         scm_visit[SCM VISIT]
-
         scm_order[SCM dbo_cv3order - Medication]
         scm_medext[SCM dbo_cv3medicationextension]
         scm_generic[SCM dbo_sxammgenericitem - RxNorm]
-
         scm_proc_placeholder[SCM procedure tables - not available]
-
         scm_obs[SCM dbo_cv3observationcur]
         scm_order_task[SCM dbo_cv3ordertaskoccurrence]
-
         scm_device_placeholder[SCM device exposure - not provided yet]
-
         scm_client[SCM dbo_cv3client]
-
         scm_obs_note[SCM dbo_scaobservation]
         scm_doc[SCM dbo_scadocument]
         scm_docdim[SCM dbo_scadocumentdim]
         scm_client_note[SCM dbo_cv3client]
-
         scm_careprovider[SCM dbo_cv3careprovider]
         scm_careproviderid[SCM dbo_cv3careproviderid]
-
         scm_address[SCM dbo_cv3address]
-
         scm_location_cs[SCM dbo_cv3location]
     end
 
     subgraph EPIC
         epic_person[EPIC PERSON]
         epic_visit[EPIC VISIT]
-
         epic_order_med[EPIC ORDER_MED]
         epic_med_sig[EPIC ORDER_MED_SIG]
         epic_med_master[EPIC CLARITY_MEDICATION]
-
         epic_order_proc[EPIC order_proc]
         epic_or_log[EPIC or_log]
-
         epic_order_results[EPIC order_results]
         epic_flowsheet[EPIC V_EHI_FLO_MEAS_EDITED]
-
         epic_or_imp[EPIC or_imp]
-
         epic_patient[EPIC patient]
-
         epic_hno[EPIC hno_info]
         epic_note_type[EPIC zc_note_type_ip]
-
         epic_clarity_ser[EPIC clarity_ser]
-
         epic_patient_addr[EPIC patient]
-
         epic_dep[EPIC clarity_dep]
         epic_loc[EPIC clarity_loc]
     end
 
 end
 
-%% ======================
-%% MAPPING
-%% ======================
-
 subgraph Mapping_Tables
     map_person[PERSON MAPPING]
     map_domain[DOMAIN MAPPING]
 end
-
-%% ======================
-%% NOTEBOOKS
-%% ======================
 
 subgraph Notebooks
     nb_person_scm[allscripts_scm_person.ipynb]
     nb_person_tw[allscripts_touchworks_person.ipynb]
     nb_person_epic[epic_clarity_person.ipynb]
 
-    nb_visit_occ_scm[allscripts_sunrise_visit_occurrence.ipynb]
-    nb_visit_occ_tw[allscripts_touchworks_visit_occurrence.ipynb]
-    nb_visit_occ_epic[epic_clarity_visit_occurrence.ipynb]
-
-    nb_visit_detail_scm[allscripts_scm_visit_detail.ipynb]
-    nb_visit_detail_tw[allscripts_touchworks_visit_detail.ipynb]
-    nb_visit_detail_epic[epic_clarity_visit_detail.ipynb]
-
-    nb_obs_scm[allscripts_scm_observation.ipynb]
-    nb_obs_tw[allscripts_touchworks_observation.ipynb]
-    nb_obs_epic[epic_clarity_observation.ipynb]
-
     nb_drug_scm[allscripts_sunrise_drug_exposure.ipynb]
     nb_drug_tw[allscripts_touchworks_drug_exposure.ipynb]
     nb_drug_epic[epic_clarity_drug_exposure.ipynb]
-
-    nb_proc_scm[allscripts_scm_procedure_occurrence.ipynb]
-    nb_proc_tw[allscripts_touchworks_procedure_occurrence.ipynb]
-    nb_proc_epic[epic_clarity_procedure_occurrence.ipynb]
-
-    nb_meas_scm[allscripts_scm_measurement.ipynb]
-    nb_meas_tw[allscripts_touchworks_measurement.ipynb]
-    nb_meas_epic[epic_clarity_measurement.ipynb]
-
-    nb_device_scm[allscripts_scm_device_exposure.ipynb]
-    nb_device_tw[allscripts_touchworks_device_exposure.ipynb]
-    nb_device_epic[epic_clarity_device_exposure.ipynb]
-
-    nb_death_scm[allscripts_scm_death.ipynb]
-    nb_death_tw[allscripts_touchworks_death.ipynb]
-    nb_death_epic[epic_clarity_death.ipynb]
-
-    nb_note_scm[allscripts_scm_note.ipynb]
-    nb_note_tw[allscripts_touchworks_note.ipynb]
-    nb_note_epic[epic_clarity_note.ipynb]
-
-    nb_provider_scm[allscripts_scm_provider.ipynb]
-    nb_provider_tw[allscripts_touchworks_provider.ipynb]
-    nb_provider_epic[epic_clarity_provider.ipynb]
-
-    nb_location_scm[allscripts_scm_location.ipynb]
-    nb_location_tw[allscripts_touchworks_location.ipynb]
-    nb_location_epic[epic_clarity_location.ipynb]
-
-    nb_care_site_scm[allscripts_scm_care_site.ipynb]
-    nb_care_site_tw[allscripts_touchworks_care_site.ipynb]
-    nb_care_site_epic[epic_clarity_care_site.ipynb]
 end
-
-%% ======================
-%% OMOP
-%% ======================
 
 subgraph OMOP
     PERSON
-    VISIT_OCCURRENCE
-    VISIT_DETAIL
-    OBSERVATION
     DRUG_EXPOSURE
-    PROCEDURE_OCCURRENCE
-    MEASUREMENT
-    DEVICE_EXPOSURE
-    DEATH
-    NOTE
-    PROVIDER
-    LOCATION
-    CARE_SITE
 end
+
+%% ======================
+%% FLOW (RESTORED)
+%% ======================
+
+tw_person --> nb_person_tw
+scm_person --> nb_person_scm
+epic_person --> nb_person_epic
+
+map_person --> nb_person_tw
+map_person --> nb_person_scm
+map_person --> nb_person_epic
+
+nb_person_tw --> PERSON
+nb_person_scm --> PERSON
+nb_person_epic --> PERSON
+
+tw_med --> nb_drug_tw
+scm_order --> nb_drug_scm
+epic_order_med --> nb_drug_epic
+
+map_domain --> nb_drug_tw
+map_domain --> nb_drug_scm
+map_domain --> nb_drug_epic
+
+nb_drug_tw --> DRUG_EXPOSURE
+nb_drug_scm --> DRUG_EXPOSURE
+nb_drug_epic --> DRUG_EXPOSURE
 ```
 
 ## 2. Clinical Events Tables
