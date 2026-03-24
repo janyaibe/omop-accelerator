@@ -56,7 +56,7 @@ subgraph Source_Systems
         scm_proc_placeholder[SCM procedure tables - not available]
         scm_obs[SCM dbo_cv3observationcur]
         scm_order_task[SCM dbo_cv3ordertaskoccurrence]
-        scm_device_placeholder[SCM device exposure - not provided yet]
+        scm_device_placeholder[SCM device exposure - notebook not found]
         scm_client[SCM dbo_cv3client]
         scm_obs_note[SCM dbo_scaobservation]
         scm_doc[SCM dbo_scadocument]
@@ -90,28 +90,94 @@ subgraph Source_Systems
 
 end
 
+%% ======================
+%% MAPPING
+%% ======================
+
 subgraph Mapping_Tables
     map_person[PERSON MAPPING]
     map_domain[DOMAIN MAPPING]
 end
+
+%% ======================
+%% NOTEBOOKS
+%% ======================
 
 subgraph Notebooks
     nb_person_scm[allscripts_scm_person.ipynb]
     nb_person_tw[allscripts_touchworks_person.ipynb]
     nb_person_epic[epic_clarity_person.ipynb]
 
+    nb_visit_occ_scm[allscripts_sunrise_visit_occurence.ipynb]
+    nb_visit_occ_tw[allscripts_touchworks_visit_occurrence.ipynb]
+    nb_visit_occ_epic[epic_clarity_visit_occurence.ipynb]
+
+    nb_visit_detail_scm[allscripts_scm_visit_detail.ipynb]
+    nb_visit_detail_tw[allscripts_touchworks_visit_detail.ipynb]
+    nb_visit_detail_epic[epic_clarity_visit_detail.ipynb]
+
+    nb_obs_scm[allscripts_scm_observation.ipynb]
+    nb_obs_tw[allscripts_touchworks_observation.ipynb]
+    nb_obs_epic[epic_clarity_observation.ipynb]
+
     nb_drug_scm[allscripts_sunrise_drug_exposure.ipynb]
     nb_drug_tw[allscripts_touchworks_drug_exposure.ipynb]
     nb_drug_epic[epic_clarity_drug_exposure.ipynb]
-end
 
-subgraph OMOP
-    PERSON
-    DRUG_EXPOSURE
+    nb_proc_scm[allscripts_scm_procedure_occurrence.ipynb]
+    nb_proc_tw[allscripts_touchworks_procedure_occurrence.ipynb]
+    nb_proc_epic[epic_clarity_procedure_occurrence.ipynb]
+
+    nb_meas_scm[allscripts_scm_measurement.ipynb]
+    nb_meas_tw[allscripts_touchworks_measurement.ipynb]
+    nb_meas_epic[epic_clarity_measurement.ipynb]
+
+    nb_device_tw[allscripts_touchworks_device_exposure.ipynb]
+    nb_device_epic[epic_clarity_device_exposure.ipynb]
+
+    nb_death_scm[allscripts_scm_death.ipynb]
+    nb_death_tw[allscripts_touchworks_death.ipynb]
+    nb_death_epic[epic_clarity_death.ipynb]
+
+    nb_note_scm[allscripts_scm_note.ipynb]
+    nb_note_tw[allscripts_touchworks_note.ipynb]
+    nb_note_epic[epic_clarity_note.ipynb]
+
+    nb_provider_scm[allscripts_scm_provider.ipynb]
+    nb_provider_tw[allscripts_touchworks_provider.ipynb]
+    nb_provider_epic[epic_clarity_provider.ipynb]
+
+    nb_location_scm[allscripts_scm_location.ipynb]
+    nb_location_tw[allscripts_touchworks_location.ipynb]
+    nb_location_epic[epic_clarity_location.ipynb]
+
+    nb_care_site_scm[allscripts_scm_care_site.ipynb]
+    nb_care_site_tw[allscripts_touchworks_care_site.ipynb]
+    nb_care_site_epic[epic_clarity_care_site.ipynb]
 end
 
 %% ======================
-%% FLOW (RESTORED)
+%% OMOP
+%% ======================
+
+subgraph OMOP
+    PERSON
+    VISIT_OCCURRENCE
+    VISIT_DETAIL
+    OBSERVATION
+    DRUG_EXPOSURE
+    PROCEDURE_OCCURRENCE
+    MEASUREMENT
+    DEVICE_EXPOSURE
+    DEATH
+    NOTE
+    PROVIDER
+    LOCATION
+    CARE_SITE
+end
+
+%% ======================
+%% PERSON
 %% ======================
 
 tw_person --> nb_person_tw
@@ -126,17 +192,245 @@ nb_person_tw --> PERSON
 nb_person_scm --> PERSON
 nb_person_epic --> PERSON
 
+%% ======================
+%% VISIT OCCURRENCE
+%% ======================
+
+tw_visit --> nb_visit_occ_tw
+scm_visit --> nb_visit_occ_scm
+epic_visit --> nb_visit_occ_epic
+
+nb_visit_occ_tw --> VISIT_OCCURRENCE
+nb_visit_occ_scm --> VISIT_OCCURRENCE
+nb_visit_occ_epic --> VISIT_OCCURRENCE
+
+%% ======================
+%% VISIT DETAIL
+%% ======================
+
+tw_visit --> nb_visit_detail_tw
+scm_visit --> nb_visit_detail_scm
+epic_visit --> nb_visit_detail_epic
+
+nb_visit_detail_tw --> VISIT_DETAIL
+nb_visit_detail_scm --> VISIT_DETAIL
+nb_visit_detail_epic --> VISIT_DETAIL
+
+%% ======================
+%% OBSERVATION
+%% ======================
+
+tw_visit --> nb_obs_tw
+scm_visit --> nb_obs_scm
+epic_visit --> nb_obs_epic
+
+map_domain --> nb_obs_tw
+map_domain --> nb_obs_scm
+map_domain --> nb_obs_epic
+
+nb_obs_tw --> OBSERVATION
+nb_obs_scm --> OBSERVATION
+nb_obs_epic --> OBSERVATION
+
+%% ======================
+%% DRUG EXPOSURE
+%% ======================
+
 tw_med --> nb_drug_tw
+tw_med_de --> nb_drug_tw
+tw_item_med --> nb_drug_tw
+
 scm_order --> nb_drug_scm
+scm_medext --> nb_drug_scm
+scm_generic --> nb_drug_scm
+
 epic_order_med --> nb_drug_epic
+epic_med_sig --> nb_drug_epic
+epic_med_master --> nb_drug_epic
 
 map_domain --> nb_drug_tw
 map_domain --> nb_drug_scm
 map_domain --> nb_drug_epic
+map_person --> nb_drug_tw
+map_person --> nb_drug_scm
+map_person --> nb_drug_epic
 
 nb_drug_tw --> DRUG_EXPOSURE
 nb_drug_scm --> DRUG_EXPOSURE
 nb_drug_epic --> DRUG_EXPOSURE
+
+%% ======================
+%% PROCEDURE OCCURRENCE
+%% ======================
+
+tw_charge --> nb_proc_tw
+tw_charge_code --> nb_proc_tw
+tw_item_result_proc --> nb_proc_tw
+tw_order_activity --> nb_proc_tw
+
+scm_proc_placeholder --> nb_proc_scm
+
+epic_order_proc --> nb_proc_epic
+epic_or_log --> nb_proc_epic
+
+map_domain --> nb_proc_tw
+map_domain --> nb_proc_scm
+map_domain --> nb_proc_epic
+map_person --> nb_proc_tw
+map_person --> nb_proc_scm
+map_person --> nb_proc_epic
+
+nb_proc_tw --> PROCEDURE_OCCURRENCE
+nb_proc_scm --> PROCEDURE_OCCURRENCE
+nb_proc_epic --> PROCEDURE_OCCURRENCE
+
+%% ======================
+%% MEASUREMENT
+%% ======================
+
+tw_item_result_meas --> nb_meas_tw
+tw_result --> nb_meas_tw
+tw_order_activity_meas --> nb_meas_tw
+
+scm_obs --> nb_meas_scm
+scm_order_task --> nb_meas_scm
+
+epic_order_results --> nb_meas_epic
+epic_flowsheet --> nb_meas_epic
+
+map_domain --> nb_meas_tw
+map_domain --> nb_meas_scm
+map_domain --> nb_meas_epic
+map_person --> nb_meas_tw
+map_person --> nb_meas_scm
+map_person --> nb_meas_epic
+
+nb_meas_tw --> MEASUREMENT
+nb_meas_scm --> MEASUREMENT
+nb_meas_epic --> MEASUREMENT
+
+%% ======================
+%% DEVICE EXPOSURE
+%% ======================
+
+tw_charge_device --> nb_device_tw
+tw_charge_code_device --> nb_device_tw
+tw_visit_device --> nb_device_tw
+
+scm_device_placeholder --> DEVICE_EXPOSURE
+
+epic_or_imp --> nb_device_epic
+
+map_domain --> nb_device_tw
+map_domain --> nb_device_epic
+map_person --> nb_device_tw
+map_person --> nb_device_epic
+
+nb_device_tw --> DEVICE_EXPOSURE
+nb_device_epic --> DEVICE_EXPOSURE
+
+%% ======================
+%% DEATH
+%% ======================
+
+tw_person_death --> nb_death_tw
+tw_person_other --> nb_death_tw
+
+scm_client --> nb_death_scm
+
+epic_patient --> nb_death_epic
+
+map_person --> nb_death_tw
+map_person --> nb_death_scm
+map_person --> nb_death_epic
+
+nb_death_tw --> DEATH
+nb_death_scm --> DEATH
+nb_death_epic --> DEATH
+
+%% ======================
+%% NOTE
+%% ======================
+
+tw_oah --> nb_note_tw
+tw_order_mapper --> nb_note_tw
+tw_result_text --> nb_note_tw
+
+scm_obs_note --> nb_note_scm
+scm_doc --> nb_note_scm
+scm_docdim --> nb_note_scm
+scm_client_note --> nb_note_scm
+
+epic_hno --> nb_note_epic
+epic_note_type --> nb_note_epic
+
+map_person --> nb_note_tw
+map_person --> nb_note_scm
+map_person --> nb_note_epic
+
+nb_note_tw --> NOTE
+nb_note_scm --> NOTE
+nb_note_epic --> NOTE
+
+%% ======================
+%% PROVIDER
+%% ======================
+
+tw_provider --> nb_provider_tw
+tw_person_provider --> nb_provider_tw
+tw_sex --> nb_provider_tw
+tw_specialty --> nb_provider_tw
+
+scm_careprovider --> nb_provider_scm
+scm_careproviderid --> nb_provider_scm
+
+epic_clarity_ser --> nb_provider_epic
+
+map_domain --> nb_provider_tw
+map_domain --> nb_provider_scm
+map_domain --> nb_provider_epic
+
+nb_provider_tw --> PROVIDER
+nb_provider_scm --> PROVIDER
+nb_provider_epic --> PROVIDER
+
+%% ======================
+%% LOCATION
+%% ======================
+
+tw_person_address --> nb_location_tw
+scm_address --> nb_location_scm
+epic_patient_addr --> nb_location_epic
+
+map_domain --> nb_location_tw
+map_domain --> nb_location_scm
+map_domain --> nb_location_epic
+
+nb_location_tw --> LOCATION
+nb_location_scm --> LOCATION
+nb_location_epic --> LOCATION
+
+%% ======================
+%% CARE SITE
+%% ======================
+
+tw_billing_loc --> nb_care_site_tw
+tw_location_de --> nb_care_site_tw
+tw_site_de --> nb_care_site_tw
+tw_site_loc --> nb_care_site_tw
+
+scm_location_cs --> nb_care_site_scm
+
+epic_dep --> nb_care_site_epic
+epic_loc --> nb_care_site_epic
+
+map_domain --> nb_care_site_tw
+map_domain --> nb_care_site_scm
+map_domain --> nb_care_site_epic
+
+nb_care_site_tw --> CARE_SITE
+nb_care_site_scm --> CARE_SITE
+nb_care_site_epic --> CARE_SITE
 ```
 
 ## 2. Clinical Events Tables
