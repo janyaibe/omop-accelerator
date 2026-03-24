@@ -10,38 +10,183 @@ This document contains ERDs for the OMOP Common Data Model v5.4, organized by ca
 flowchart LR
 
 %% ======================
-%% 1. CORE TABLES
+%% SOURCE SYSTEMS
 %% ======================
 
 subgraph Source_Systems
-    tw_person[TW PERSON]
-    scm_person[SCM PERSON]
-    epic_person[EPIC PERSON]
 
-    tw_visit[TW VISIT]
-    scm_visit[SCM VISIT]
-    epic_visit[EPIC VISIT]
+    subgraph TW
+        tw_person[TW PERSON]
+        tw_visit[TW VISIT]
+
+        tw_med[TW dbo_medication]
+        tw_med_de[TW dbo_medication_de]
+        tw_item_med[TW dbo_item_medication]
+
+        tw_charge[TW dbo_charge]
+        tw_charge_code[TW dbo_charge_code_de]
+        tw_item_result_proc[TW dbo_item_result]
+        tw_order_activity[TW dbo_order_activity_header]
+
+        tw_item_result_meas[TW dbo_item_result]
+        tw_result[TW dbo_result]
+        tw_order_activity_meas[TW dbo_order_activity_header]
+
+        tw_charge_device[TW dbo_charge]
+        tw_charge_code_device[TW dbo_charge_code_de]
+        tw_visit_device[TW dbo_visit]
+
+        tw_person_death[TW dbo_person]
+        tw_person_other[TW dbo_person_other]
+
+        tw_oah[TW dbo_order_activity_header]
+        tw_order_mapper[TW dbo_order_result_mapper]
+        tw_result_text[TW dbo_result_text]
+
+        tw_provider[TW dbo_provider]
+        tw_person_provider[TW dbo_person]
+        tw_sex[TW dbo_sex_de]
+        tw_specialty[TW dbo_specialty_de]
+
+        tw_person_address[TW dbo_person_address]
+
+        tw_billing_loc[TW dbo_billing_location_de]
+        tw_location_de[TW dbo_location_de]
+        tw_site_de[TW dbo_site_de]
+        tw_site_loc[TW dbo_site_location_de]
+    end
+
+    subgraph SCM
+        scm_person[SCM PERSON]
+        scm_visit[SCM VISIT]
+
+        scm_order[SCM dbo_cv3order - Medication]
+        scm_medext[SCM dbo_cv3medicationextension]
+        scm_generic[SCM dbo_sxammgenericitem - RxNorm]
+
+        scm_proc_placeholder[SCM procedure tables - not available]
+
+        scm_obs[SCM dbo_cv3observationcur]
+        scm_order_task[SCM dbo_cv3ordertaskoccurrence]
+
+        scm_device_placeholder[SCM device exposure - not provided yet]
+
+        scm_client[SCM dbo_cv3client]
+
+        scm_obs_note[SCM dbo_scaobservation]
+        scm_doc[SCM dbo_scadocument]
+        scm_docdim[SCM dbo_scadocumentdim]
+        scm_client_note[SCM dbo_cv3client]
+
+        scm_careprovider[SCM dbo_cv3careprovider]
+        scm_careproviderid[SCM dbo_cv3careproviderid]
+
+        scm_address[SCM dbo_cv3address]
+
+        scm_location_cs[SCM dbo_cv3location]
+    end
+
+    subgraph EPIC
+        epic_person[EPIC PERSON]
+        epic_visit[EPIC VISIT]
+
+        epic_order_med[EPIC ORDER_MED]
+        epic_med_sig[EPIC ORDER_MED_SIG]
+        epic_med_master[EPIC CLARITY_MEDICATION]
+
+        epic_order_proc[EPIC order_proc]
+        epic_or_log[EPIC or_log]
+
+        epic_order_results[EPIC order_results]
+        epic_flowsheet[EPIC V_EHI_FLO_MEAS_EDITED]
+
+        epic_or_imp[EPIC or_imp]
+
+        epic_patient[EPIC patient]
+
+        epic_hno[EPIC hno_info]
+        epic_note_type[EPIC zc_note_type_ip]
+
+        epic_clarity_ser[EPIC clarity_ser]
+
+        epic_patient_addr[EPIC patient]
+
+        epic_dep[EPIC clarity_dep]
+        epic_loc[EPIC clarity_loc]
+    end
+
 end
+
+%% ======================
+%% MAPPING
+%% ======================
 
 subgraph Mapping_Tables
     map_person[PERSON MAPPING]
     map_domain[DOMAIN MAPPING]
 end
 
+%% ======================
+%% NOTEBOOKS
+%% ======================
+
 subgraph Notebooks
-    nb_person[nb_person]
-    nb_visit[nb_visit]
-    nb_obs[nb_observation]
-    nb_drug[nb_drug_exposure]
-    nb_proc[nb_procedure_occurrence]
-    nb_meas[nb_measurement]
-    nb_device[nb_device_exposure]
-    nb_death[nb_death]
-    nb_note[nb_note]
-    nb_provider[nb_provider]
-    nb_location[nb_location]
-    nb_care_site[nb_care_site]
+    nb_person_scm[allscripts_scm_person.ipynb]
+    nb_person_tw[allscripts_touchworks_person.ipynb]
+    nb_person_epic[epic_clarity_person.ipynb]
+
+    nb_visit_occ_scm[allscripts_sunrise_visit_occurrence.ipynb]
+    nb_visit_occ_tw[allscripts_touchworks_visit_occurrence.ipynb]
+    nb_visit_occ_epic[epic_clarity_visit_occurrence.ipynb]
+
+    nb_visit_detail_scm[allscripts_scm_visit_detail.ipynb]
+    nb_visit_detail_tw[allscripts_touchworks_visit_detail.ipynb]
+    nb_visit_detail_epic[epic_clarity_visit_detail.ipynb]
+
+    nb_obs_scm[allscripts_scm_observation.ipynb]
+    nb_obs_tw[allscripts_touchworks_observation.ipynb]
+    nb_obs_epic[epic_clarity_observation.ipynb]
+
+    nb_drug_scm[allscripts_sunrise_drug_exposure.ipynb]
+    nb_drug_tw[allscripts_touchworks_drug_exposure.ipynb]
+    nb_drug_epic[epic_clarity_drug_exposure.ipynb]
+
+    nb_proc_scm[allscripts_scm_procedure_occurrence.ipynb]
+    nb_proc_tw[allscripts_touchworks_procedure_occurrence.ipynb]
+    nb_proc_epic[epic_clarity_procedure_occurrence.ipynb]
+
+    nb_meas_scm[allscripts_scm_measurement.ipynb]
+    nb_meas_tw[allscripts_touchworks_measurement.ipynb]
+    nb_meas_epic[epic_clarity_measurement.ipynb]
+
+    nb_device_scm[allscripts_scm_care_site_nope.ipynb]
+    nb_device_tw[allscripts_touchworks_device_exposure.ipynb]
+    nb_device_epic[epic_clarity_device_exposure.ipynb]
+
+    nb_death_scm[allscripts_scm_death.ipynb]
+    nb_death_tw[allscripts_touchworks_death.ipynb]
+    nb_death_epic[epic_clarity_death.ipynb]
+
+    nb_note_scm[allscripts_scm_note.ipynb]
+    nb_note_tw[allscripts_touchworks_note.ipynb]
+    nb_note_epic[epic_clarity_note.ipynb]
+
+    nb_provider_scm[allscripts_scm_provider.ipynb]
+    nb_provider_tw[allscripts_touchworks_provider.ipynb]
+    nb_provider_epic[epic_clarity_provider.ipynb]
+
+    nb_location_scm[allscripts_scm_location.ipynb]
+    nb_location_tw[allscripts_touchworks_location.ipynb]
+    nb_location_epic[epic_clarity_location.ipynb]
+
+    nb_care_site_scm[allscripts_scm_care_site.ipynb]
+    nb_care_site_tw[allscripts_touchworks_care_site.ipynb]
+    nb_care_site_epic[epic_clarity_care_site.ipynb]
 end
+
+%% ======================
+%% OMOP
+%% ======================
 
 subgraph OMOP
     PERSON
@@ -63,322 +208,260 @@ end
 %% PERSON
 %% ======================
 
-tw_person --> nb_person
-scm_person --> nb_person
-epic_person --> nb_person
-map_person --> nb_person
-nb_person --> PERSON
+tw_person --> nb_person_tw
+scm_person --> nb_person_scm
+epic_person --> nb_person_epic
+
+map_person --> nb_person_tw
+map_person --> nb_person_scm
+map_person --> nb_person_epic
+
+nb_person_tw --> PERSON
+nb_person_scm --> PERSON
+nb_person_epic --> PERSON
 
 %% ======================
-%% VISIT
+%% VISIT OCCURRENCE
 %% ======================
 
-tw_visit --> nb_visit
-scm_visit --> nb_visit
-epic_visit --> nb_visit
-nb_visit --> VISIT_OCCURRENCE
-nb_visit --> VISIT_DETAIL
+tw_visit --> nb_visit_occ_tw
+scm_visit --> nb_visit_occ_scm
+epic_visit --> nb_visit_occ_epic
+
+nb_visit_occ_tw --> VISIT_OCCURRENCE
+nb_visit_occ_scm --> VISIT_OCCURRENCE
+nb_visit_occ_epic --> VISIT_OCCURRENCE
+
+%% ======================
+%% VISIT DETAIL
+%% ======================
+
+tw_visit --> nb_visit_detail_tw
+scm_visit --> nb_visit_detail_scm
+epic_visit --> nb_visit_detail_epic
+
+nb_visit_detail_tw --> VISIT_DETAIL
+nb_visit_detail_scm --> VISIT_DETAIL
+nb_visit_detail_epic --> VISIT_DETAIL
 
 %% ======================
 %% OBSERVATION
 %% ======================
 
-tw_visit --> nb_obs
-scm_visit --> nb_obs
-epic_visit --> nb_obs
-map_domain --> nb_obs
-nb_obs --> OBSERVATION
+tw_visit --> nb_obs_tw
+scm_visit --> nb_obs_scm
+epic_visit --> nb_obs_epic
+
+map_domain --> nb_obs_tw
+map_domain --> nb_obs_scm
+map_domain --> nb_obs_epic
+
+nb_obs_tw --> OBSERVATION
+nb_obs_scm --> OBSERVATION
+nb_obs_epic --> OBSERVATION
 
 %% ======================
 %% DRUG EXPOSURE
 %% ======================
 
-%% -------- TW --------
-tw_med[TW dbo_medication]
-tw_med_de[TW dbo_medication_de]
-tw_item_med[TW dbo_item_medication]
+tw_med --> nb_drug_tw
+tw_med_de --> nb_drug_tw
+tw_item_med --> nb_drug_tw
 
-tw_med --> nb_drug
-tw_med_de --> nb_drug
-tw_item_med --> nb_drug
+scm_order --> nb_drug_scm
+scm_medext --> nb_drug_scm
+scm_generic --> nb_drug_scm
 
-%% -------- SCM --------
-scm_order[SCM dbo_cv3order - Medication]
-scm_medext[SCM dbo_cv3medicationextension]
-scm_generic[SCM dbo_sxammgenericitem - RxNorm]
+epic_order_med --> nb_drug_epic
+epic_med_sig --> nb_drug_epic
+epic_med_master --> nb_drug_epic
 
-scm_order --> nb_drug
-scm_medext --> nb_drug
-scm_generic --> nb_drug
+map_domain --> nb_drug_tw
+map_domain --> nb_drug_scm
+map_domain --> nb_drug_epic
+map_person --> nb_drug_tw
+map_person --> nb_drug_scm
+map_person --> nb_drug_epic
 
-%% -------- EPIC --------
-epic_order_med[EPIC ORDER_MED]
-epic_med_sig[EPIC ORDER_MED_SIG]
-epic_med_master[EPIC CLARITY_MEDICATION]
-
-epic_order_med --> nb_drug
-epic_med_sig --> nb_drug
-epic_med_master --> nb_drug
-
-%% -------- MAPPING --------
-map_domain --> nb_drug
-map_person --> nb_drug
-
-%% -------- OUTPUT --------
-nb_drug --> DRUG_EXPOSURE
+nb_drug_tw --> DRUG_EXPOSURE
+nb_drug_scm --> DRUG_EXPOSURE
+nb_drug_epic --> DRUG_EXPOSURE
 
 %% ======================
 %% PROCEDURE OCCURRENCE
 %% ======================
 
-%% -------- TW --------
-tw_charge[TW dbo_charge]
-tw_charge_code[TW dbo_charge_code_de]
-tw_item_result[TW dbo_item_result]
-tw_order_activity[TW dbo_order_activity_header]
+tw_charge --> nb_proc_tw
+tw_charge_code --> nb_proc_tw
+tw_item_result_proc --> nb_proc_tw
+tw_order_activity --> nb_proc_tw
 
-tw_charge --> nb_proc
-tw_charge_code --> nb_proc
-tw_item_result --> nb_proc
-tw_order_activity --> nb_proc
+scm_proc_placeholder --> nb_proc_scm
 
-%% -------- EPIC --------
-epic_order_proc[EPIC order_proc]
-epic_or_log[EPIC or_log]
+epic_order_proc --> nb_proc_epic
+epic_or_log --> nb_proc_epic
 
-epic_order_proc --> nb_proc
-epic_or_log --> nb_proc
+map_domain --> nb_proc_tw
+map_domain --> nb_proc_scm
+map_domain --> nb_proc_epic
+map_person --> nb_proc_tw
+map_person --> nb_proc_scm
+map_person --> nb_proc_epic
 
-%% -------- SCM --------
-scm_proc_placeholder[SCM procedure tables - not available]
-
-scm_proc_placeholder --> nb_proc
-
-%% -------- MAPPING --------
-map_domain --> nb_proc
-map_person --> nb_proc
-
-%% -------- OUTPUT --------
-nb_proc --> PROCEDURE_OCCURRENCE
+nb_proc_tw --> PROCEDURE_OCCURRENCE
+nb_proc_scm --> PROCEDURE_OCCURRENCE
+nb_proc_epic --> PROCEDURE_OCCURRENCE
 
 %% ======================
 %% MEASUREMENT
 %% ======================
 
-%% -------- TW --------
-tw_item_result[TW dbo_item_result]
-tw_result[TW dbo_result]
-tw_order_activity[TW dbo_order_activity_header]
+tw_item_result_meas --> nb_meas_tw
+tw_result --> nb_meas_tw
+tw_order_activity_meas --> nb_meas_tw
 
-tw_item_result --> nb_meas
-tw_result --> nb_meas
-tw_order_activity --> nb_meas
+scm_obs --> nb_meas_scm
+scm_order_task --> nb_meas_scm
 
-%% -------- SCM --------
-scm_obs[SCM dbo_cv3observationcur]
-scm_order_task[SCM dbo_cv3ordertaskoccurrence]
+epic_order_results --> nb_meas_epic
+epic_flowsheet --> nb_meas_epic
 
-scm_obs --> nb_meas
-scm_order_task --> nb_meas
+map_domain --> nb_meas_tw
+map_domain --> nb_meas_scm
+map_domain --> nb_meas_epic
+map_person --> nb_meas_tw
+map_person --> nb_meas_scm
+map_person --> nb_meas_epic
 
-%% -------- EPIC --------
-epic_order_results[EPIC order_results]
-epic_flowsheet[EPIC V_EHI_FLO_MEAS_EDITED]
-
-epic_order_results --> nb_meas
-epic_flowsheet --> nb_meas
-
-%% -------- MAPPING --------
-map_domain --> nb_meas
-map_person --> nb_meas
-
-%% -------- OUTPUT --------
-nb_meas --> MEASUREMENT
+nb_meas_tw --> MEASUREMENT
+nb_meas_scm --> MEASUREMENT
+nb_meas_epic --> MEASUREMENT
 
 %% ======================
 %% DEVICE EXPOSURE
 %% ======================
 
-%% -------- TW --------
-tw_charge_device[TW dbo_charge]
-tw_charge_code_device[TW dbo_charge_code_de]
-tw_visit_device[TW dbo_visit]
+tw_charge_device --> nb_device_tw
+tw_charge_code_device --> nb_device_tw
+tw_visit_device --> nb_device_tw
 
-tw_charge_device --> nb_device
-tw_charge_code_device --> nb_device
-tw_visit_device --> nb_device
+scm_device_placeholder --> nb_device_scm
 
-%% -------- SCM --------
-scm_device_placeholder[SCM device exposure - not provided yet]
+epic_or_imp --> nb_device_epic
 
-scm_device_placeholder --> nb_device
+map_domain --> nb_device_tw
+map_domain --> nb_device_scm
+map_domain --> nb_device_epic
+map_person --> nb_device_tw
+map_person --> nb_device_scm
+map_person --> nb_device_epic
 
-%% -------- EPIC --------
-epic_or_imp[EPIC or_imp]
-
-epic_or_imp --> nb_device
-
-%% -------- MAPPING --------
-map_domain --> nb_device
-map_person --> nb_device
-
-%% -------- OUTPUT --------
-nb_device --> DEVICE_EXPOSURE
+nb_device_tw --> DEVICE_EXPOSURE
+nb_device_scm --> DEVICE_EXPOSURE
+nb_device_epic --> DEVICE_EXPOSURE
 
 %% ======================
 %% DEATH
 %% ======================
 
-%% -------- TW --------
-tw_person[TW dbo_person]
-tw_person_other[TW dbo_person_other]
+tw_person_death --> nb_death_tw
+tw_person_other --> nb_death_tw
 
-tw_person --> nb_death
-tw_person_other --> nb_death
+scm_client --> nb_death_scm
 
-%% -------- SCM --------
-scm_client[SCM dbo_cv3client]
+epic_patient --> nb_death_epic
 
-scm_client --> nb_death
+map_person --> nb_death_tw
+map_person --> nb_death_scm
+map_person --> nb_death_epic
 
-%% -------- EPIC --------
-epic_patient[EPIC patient]
-
-epic_patient --> nb_death
-
-%% -------- MAPPING --------
-map_person --> nb_death
-
-%% -------- OUTPUT --------
-nb_death --> DEATH
+nb_death_tw --> DEATH
+nb_death_scm --> DEATH
+nb_death_epic --> DEATH
 
 %% ======================
 %% NOTE
 %% ======================
 
-%% -------- TW --------
-tw_oah[TW dbo_order_activity_header]
-tw_order_mapper[TW dbo_order_result_mapper]
-tw_result_text[TW dbo_result_text]
+tw_oah --> nb_note_tw
+tw_order_mapper --> nb_note_tw
+tw_result_text --> nb_note_tw
 
-tw_oah --> nb_note
-tw_order_mapper --> nb_note
-tw_result_text --> nb_note
+scm_obs_note --> nb_note_scm
+scm_doc --> nb_note_scm
+scm_docdim --> nb_note_scm
+scm_client_note --> nb_note_scm
 
-%% -------- SCM --------
-scm_obs_note[SCM dbo_scaobservation]
-scm_doc[SCM dbo_scadocument]
-scm_docdim[SCM dbo_scadocumentdim]
-scm_client_note[SCM dbo_cv3client]
+epic_hno --> nb_note_epic
+epic_note_type --> nb_note_epic
 
-scm_obs_note --> nb_note
-scm_doc --> nb_note
-scm_docdim --> nb_note
-scm_client_note --> nb_note
+map_person --> nb_note_tw
+map_person --> nb_note_scm
+map_person --> nb_note_epic
 
-%% -------- EPIC --------
-epic_hno[EPIC hno_info]
-epic_note_type[EPIC zc_note_type_ip]
-
-epic_hno --> nb_note
-epic_note_type --> nb_note
-
-%% -------- MAPPING --------
-map_person --> nb_note
-
-%% -------- OUTPUT --------
-nb_note --> NOTE
+nb_note_tw --> NOTE
+nb_note_scm --> NOTE
+nb_note_epic --> NOTE
 
 %% ======================
 %% PROVIDER
 %% ======================
 
-%% -------- TW --------
-tw_provider[TW dbo_provider]
-tw_person_provider[TW dbo_person]
-tw_sex[TW dbo_sex_de]
-tw_specialty[TW dbo_specialty_de]
+tw_provider --> nb_provider_tw
+tw_person_provider --> nb_provider_tw
+tw_sex --> nb_provider_tw
+tw_specialty --> nb_provider_tw
 
-tw_provider --> nb_provider
-tw_person_provider --> nb_provider
-tw_sex --> nb_provider
-tw_specialty --> nb_provider
+scm_careprovider --> nb_provider_scm
+scm_careproviderid --> nb_provider_scm
 
-%% -------- SCM --------
-scm_careprovider[SCM dbo_cv3careprovider]
-scm_careproviderid[SCM dbo_cv3careproviderid]
+epic_clarity_ser --> nb_provider_epic
 
-scm_careprovider --> nb_provider
-scm_careproviderid --> nb_provider
+map_domain --> nb_provider_tw
+map_domain --> nb_provider_scm
+map_domain --> nb_provider_epic
 
-%% -------- EPIC --------
-epic_clarity_ser[EPIC clarity_ser]
-
-epic_clarity_ser --> nb_provider
-
-%% -------- MAPPING --------
-map_domain --> nb_provider
-
-%% -------- OUTPUT --------
-nb_provider --> PROVIDER
+nb_provider_tw --> PROVIDER
+nb_provider_scm --> PROVIDER
+nb_provider_epic --> PROVIDER
 
 %% ======================
 %% LOCATION
 %% ======================
 
-%% -------- TW --------
-tw_person_address[TW dbo_person_address]
+tw_person_address --> nb_location_tw
+scm_address --> nb_location_scm
+epic_patient_addr --> nb_location_epic
 
-tw_person_address --> nb_location
+map_domain --> nb_location_tw
+map_domain --> nb_location_scm
+map_domain --> nb_location_epic
 
-%% -------- SCM --------
-scm_address[SCM dbo_cv3address]
-
-scm_address --> nb_location
-
-%% -------- EPIC --------
-epic_patient_addr[EPIC patient]
-
-epic_patient_addr --> nb_location
-
-%% -------- MAPPING --------
-map_domain --> nb_location
-
-%% -------- OUTPUT --------
-nb_location --> LOCATION
+nb_location_tw --> LOCATION
+nb_location_scm --> LOCATION
+nb_location_epic --> LOCATION
 
 %% ======================
 %% CARE SITE
 %% ======================
 
-%% -------- TW --------
-tw_billing_loc[TW dbo_billing_location_de]
-tw_location_de[TW dbo_location_de]
-tw_site_de[TW dbo_site_de]
-tw_site_loc[TW dbo_site_location_de]
+tw_billing_loc --> nb_care_site_tw
+tw_location_de --> nb_care_site_tw
+tw_site_de --> nb_care_site_tw
+tw_site_loc --> nb_care_site_tw
 
-tw_billing_loc --> nb_care_site
-tw_location_de --> nb_care_site
-tw_site_de --> nb_care_site
-tw_site_loc --> nb_care_site
+scm_location_cs --> nb_care_site_scm
 
-%% -------- SCM --------
-scm_location_cs[SCM dbo_cv3location]
+epic_dep --> nb_care_site_epic
+epic_loc --> nb_care_site_epic
 
-scm_location_cs --> nb_care_site
+map_domain --> nb_care_site_tw
+map_domain --> nb_care_site_scm
+map_domain --> nb_care_site_epic
 
-%% -------- EPIC --------
-epic_dep[EPIC clarity_dep]
-epic_loc[EPIC clarity_loc]
-
-epic_dep --> nb_care_site
-epic_loc --> nb_care_site
-
-%% -------- MAPPING --------
-map_domain --> nb_care_site
-
-%% -------- OUTPUT --------
-nb_care_site --> CARE_SITE
+nb_care_site_tw --> CARE_SITE
+nb_care_site_scm --> CARE_SITE
+nb_care_site_epic --> CARE_SITE
 ```
 
 ## 2. Clinical Events Tables
