@@ -34,6 +34,7 @@ subgraph Notebooks
     nb_obs[nb_observation]
     nb_drug[nb_drug_exposure]
     nb_proc[nb_procedure_occurrence]
+    nb_meas[nb_measurement]
 end
 
 subgraph OMOP
@@ -43,6 +44,7 @@ subgraph OMOP
     OBSERVATION
     DRUG_EXPOSURE
     PROCEDURE_OCCURRENCE
+    MEASUREMENT
 end
 
 %% ======================
@@ -146,6 +148,40 @@ map_person --> nb_proc
 
 %% -------- OUTPUT --------
 nb_proc --> PROCEDURE_OCCURRENCE
+
+%% ======================
+%% MEASUREMENT
+%% ======================
+
+%% -------- TW --------
+tw_item_result[TW dbo_item_result]
+tw_result[TW dbo_result]
+tw_order_activity[TW dbo_order_activity_header]
+
+tw_item_result --> nb_meas
+tw_result --> nb_meas
+tw_order_activity --> nb_meas
+
+%% -------- SCM --------
+scm_obs[SCM dbo_cv3observationcur]
+scm_order_task[SCM dbo_cv3ordertaskoccurrence]
+
+scm_obs --> nb_meas
+scm_order_task --> nb_meas
+
+%% -------- EPIC --------
+epic_order_results[EPIC order_results]
+epic_flowsheet[EPIC V_EHI_FLO_MEAS_EDITED]
+
+epic_order_results --> nb_meas
+epic_flowsheet --> nb_meas
+
+%% -------- MAPPING --------
+map_domain --> nb_meas
+map_person --> nb_meas
+
+%% -------- OUTPUT --------
+nb_meas --> MEASUREMENT
 ```
 
 ## 2. Clinical Events Tables
