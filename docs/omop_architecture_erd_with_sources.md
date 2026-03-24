@@ -39,30 +39,30 @@ flowchart LR
    epic_visit --> nb_visit
    nb_visit --> VISIT_OCCURRENCE
 
-    TW --> nb_condition
-    SCM --> nb_condition
-    EPIC --> nb_condition
-    nb_condition --> CONDITION_OCCURRENCE
+   tw_condition --> nb_condition
+   scm_condition --> nb_condition
+   epic_condition --> nb_condition
+   nb_condition --> CONDITION_OCCURRENCE
 
-    TW --> nb_drug
-    SCM --> nb_drug
-    EPIC --> nb_drug
-    nb_drug --> DRUG_EXPOSURE
+   tw_drug --> nb_drug
+   scm_drug --> nb_drug
+   epic_drug --> nb_drug
+   nb_drug --> DRUG_EXPOSURE
 
-    TW --> nb_proc
-    SCM --> nb_proc
-    EPIC --> nb_proc
-    nb_proc --> PROCEDURE_OCCURRENCE
+   tw_procedure --> nb_proc
+   scm_procedure --> nb_proc
+   epic_procedure --> nb_proc
+   nb_proc --> PROCEDURE_OCCURRENCE
 
-    TW --> nb_meas
-    SCM --> nb_meas
-    EPIC --> nb_meas
-    nb_meas --> MEASUREMENT
+   tw_measurement --> nb_meas
+   scm_measurement --> nb_meas
+   epic_measurement --> nb_meas
+   nb_meas --> MEASUREMENT
 
-    TW --> nb_obs
-    SCM --> nb_obs
-    EPIC --> nb_obs
-    nb_obs --> OBSERVATION
+   tw_observation --> nb_obs
+   scm_observation --> nb_obs
+   epic_observation --> nb_obs
+   nb_obs --> OBSERVATION
 ```
 ## 2. Clinical Events Tables
 
