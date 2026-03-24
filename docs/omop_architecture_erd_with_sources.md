@@ -66,6 +66,7 @@ epic_patient_race --> nb_person
 map_domain --> nb_person
 map_location --> nb_person
 map_person --> nb_person
+nb_person --> PERSON
 
    tw_visit --> nb_visit
    scm_visit --> nb_visit
