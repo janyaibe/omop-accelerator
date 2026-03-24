@@ -68,6 +68,7 @@ flowchart LR
     subgraph DBX[Databricks Hydration Notebooks]
         nb_person[PERSON notebook]
         nb_visit[VISIT_OCCURRENCE notebook]
+        nb_visit_detail[VISIT_DETAIL notebook]
         nb_condition[CONDITION_OCCURRENCE notebook]
         nb_drug[DRUG_EXPOSURE notebook]
         nb_proc[PROCEDURE_OCCURRENCE notebook]
@@ -82,6 +83,7 @@ flowchart LR
     subgraph OMOP[OMOP Tables]
         PERSON
         VISIT_OCCURRENCE
+        VISIT_DETAIL
         CONDITION_OCCURRENCE
         DRUG_EXPOSURE
         PROCEDURE_OCCURRENCE
@@ -118,6 +120,7 @@ flowchart LR
     scm_visit --> nb_visit
     epic_visit --> nb_visit
     nb_visit --> VISIT_OCCURRENCE
+    nb_visit_detail --> VISIT_DETAIL
 
     %% ======================
     %% CONDITION
