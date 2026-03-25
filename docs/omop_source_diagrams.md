@@ -1,10 +1,10 @@
 # OMOP Source System Diagrams
 
-Mapping Layer Overview:
-    Source tables provide raw clinical data but lack standardization.
-    Person Mapping aligns source patient identifiers to a consistent OMOP person_id across all domains.
-    Domain Mapping classifies source records by clinical type and directs them to the correct OMOP table.
-    Hydration notebooks apply both mappings to transform, standardize, and load data into OMOP.
+Mapping Layer Overview:<br/>
+    Source tables provide raw clinical data but lack standardization.<br/>
+    Person Mapping aligns source patient identifiers to a consistent OMOP person_id across all domains.<br/>
+    Domain Mapping classifies source records by clinical type and directs them to the correct OMOP table.<br/>
+    Hydration notebooks apply both mappings to transform, standardize, and load data into OMOP.<br/>
 ---
 
 ## TouchWorks → OMOP
