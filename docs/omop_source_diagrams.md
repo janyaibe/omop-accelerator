@@ -1,6 +1,6 @@
 # OMOP Source System Diagrams
 
-Mapping Layer Overview<br/>
+Mapping Layer Overview:<br/>
 Source Data → Raw clinical inputs<br/>
 Person Mapping → Standardize patient identity → Map source IDs to OMOP person_id<br/>
 Domain Mapping → Determine data type → Route to appropriate OMOP table<br/>
