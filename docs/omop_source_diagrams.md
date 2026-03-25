@@ -1,10 +1,10 @@
 # OMOP Source System Diagrams
 
 Mapping Layer Overview<br/><br/>
-Source Data → Raw inputs<br/>
-Person Mapping → Patient identity (person_id)<br/>
-Domain Mapping → Clinical classification<br/>
-Notebooks → Transform + Load into OMOP
+Source Data → Raw clinical inputs<br/><br/>
+Person Mapping → Standardize patient identity<br/>→ Map source IDs to OMOP person_id<br/><br/>
+Domain Mapping → Determine data type<br/>→ Route to appropriate OMOP table<br/><br/>
+Notebooks → Apply logic and load to OMOP
 ---
 
 ## TouchWorks → OMOP
