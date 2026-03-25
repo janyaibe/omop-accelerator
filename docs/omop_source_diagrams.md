@@ -1,8 +1,10 @@
 # OMOP Source System Diagrams
 
-These diagrams show source-to-notebook-to-OMOP data flow for each EHR source system.  
-Each diagram is split out from the combined multi-source architecture for clarity and maintainability.
-
+%% Mapping Layer Overview
+%% Source tables provide raw clinical data but lack standardization.
+%% Person Mapping aligns source patient identifiers to a consistent OMOP person_id across all domains.
+%% Domain Mapping classifies source records by clinical type and directs them to the correct OMOP table.
+%% Hydration notebooks apply both mappings to transform, standardize, and load data into OMOP.
 ---
 
 ## TouchWorks → OMOP
