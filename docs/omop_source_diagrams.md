@@ -3,7 +3,7 @@
 Mapping Layer Overview<br/><br/>
 Source Data → Raw inputs<br/>
 Person Mapping → Patient identity (person_id)<br/>
-Domain Mapping → Clinical classification<br/><br/>
+Domain Mapping → Clinical classification<br/>
 Notebooks → Transform + Load into OMOP
 ---
 
