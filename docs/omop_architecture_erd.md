@@ -86,6 +86,8 @@ erDiagram
     VISIT_OCCURRENCE ||--o{ VISIT_DETAIL : contains
 ```
 
+
+
 ---
 
 ## 2. Clinical Events Tables
@@ -199,6 +201,8 @@ erDiagram
     PERSON ||--o{ DEVICE_EXPOSURE : has
 ```
 
+
+
 ---
 
 ## 3. Notes and Specimens
@@ -254,6 +258,8 @@ erDiagram
     NOTE ||--o{ NOTE_NLP : analyzed_by
 ```
 
+
+
 ---
 
 ## 4. Health System Tables
@@ -301,6 +307,8 @@ erDiagram
     CARE_SITE ||--o{ PERSON : care_site_of
     PROVIDER ||--o{ PERSON : provider_of
 ```
+
+
 
 ---
 
@@ -382,6 +390,8 @@ erDiagram
     RELATIONSHIP ||--o{ CONCEPT_RELATIONSHIP : defines
 ```
 
+
+
 ---
 
 ## 6. Mapping and Drug Strength Tables
@@ -417,6 +427,8 @@ erDiagram
     CONCEPT ||--o{ SOURCE_TO_CONCEPT_MAP : maps_to
     CONCEPT ||--o{ DRUG_STRENGTH : drug_info
 ```
+
+
 
 ---
 
@@ -482,6 +494,8 @@ erDiagram
     EPISODE ||--o{ EPISODE_EVENT : contains
 ```
 
+
+
 ---
 
 ## 8. Cohort Tables
@@ -526,6 +540,8 @@ erDiagram
     COHORT_DEFINITION ||--o{ COHORT_ATTRIBUTE : has_attributes
     ATTRIBUTE_DEFINITION ||--o{ COHORT_ATTRIBUTE : defines
 ```
+
+
 
 ---
 
@@ -579,6 +595,8 @@ erDiagram
     PAYER_PLAN_PERIOD ||--o{ COST : covers
 ```
 
+
+
 ---
 
 ## 10. Metadata Tables
@@ -610,23 +628,27 @@ erDiagram
     }
 ```
 
+
+
 ---
 
 ## Table Summary
 
-| Category        | Tables                                                                                                  | Count |
-| --------------- | ------------------------------------------------------------------------------------------------------- | ----- |
-| Clinical Core   | person, observation_period, visit_occurrence, visit_detail, death                                       | 5     |
-| Clinical Events | condition_occurrence, drug_exposure, procedure_occurrence, device_exposure, measurement, observation    | 6     |
-| Notes/Specimens | note, note_nlp, specimen                                                                                | 3     |
-| Health System   | location, care_site, provider                                                                           | 3     |
-| Vocabulary      | concept, vocabulary, domain, concept_class, concept_relationship, relationship, concept_synonym, concept_ancestor | 8     |
-| Mapping         | source_to_concept_map, drug_strength                                                                    | 2     |
-| Derived/Era     | condition_era, drug_era, dose_era, episode, episode_event                                               | 5     |
-| Cohort          | cohort, cohort_definition, cohort_attribute, attribute_definition                                       | 4     |
-| Cost/Payer      | cost, payer_plan_period, fact_relationship                                                              | 3     |
-| Metadata        | cdm_source, metadata                                                                                    | 2     |
-| **Total**       |                                                                                                         | **41** |
+
+| Category        | Tables                                                                                                            | Count  |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- | ------ |
+| Clinical Core   | person, observation_period, visit_occurrence, visit_detail, death                                                 | 5      |
+| Clinical Events | condition_occurrence, drug_exposure, procedure_occurrence, device_exposure, measurement, observation              | 6      |
+| Notes/Specimens | note, note_nlp, specimen                                                                                          | 3      |
+| Health System   | location, care_site, provider                                                                                     | 3      |
+| Vocabulary      | concept, vocabulary, domain, concept_class, concept_relationship, relationship, concept_synonym, concept_ancestor | 8      |
+| Mapping         | source_to_concept_map, drug_strength                                                                              | 2      |
+| Derived/Era     | condition_era, drug_era, dose_era, episode, episode_event                                                         | 5      |
+| Cohort          | cohort, cohort_definition, cohort_attribute, attribute_definition                                                 | 4      |
+| Cost/Payer      | cost, payer_plan_period, fact_relationship                                                                        | 3      |
+| Metadata        | cdm_source, metadata                                                                                              | 2      |
+| **Total**       |                                                                                                                   | **41** |
+
 
 ---
 
@@ -662,3 +684,6 @@ erDiagram
     COHORT_DEFINITION ||--o{ COHORT : defines
     PAYER_PLAN_PERIOD ||--o{ COST : covers
 ```
+
+
+

@@ -1,11 +1,14 @@
 # OMOP Source System Diagrams
 
-Mapping Layer Overview:<br/>
-Source Data = Raw clinical inputs<br/>
-Person Mapping = Standardize patient identity → Map source IDs to OMOP person_id<br/>
-Domain Mapping = Determine data type → Route to appropriate OMOP table<br/>
+## Mapping Layer Overview:  
+
+Source Data = Raw clinical inputs  
+
+Person Mapping = Standardize patient identity → Map source IDs to OMOP person_id  
+
+Domain Mapping = Determine data type → Route to appropriate OMOP table  
+
 Notebooks = Apply logic and load to OMOP
----
 
 ## TouchWorks → OMOP
 
@@ -154,6 +157,8 @@ map_domain --> nb_care_site
 nb_care_site --> CARE_SITE
 ```
 
+
+
 ---
 
 ## SCM / Sunrise → OMOP
@@ -276,6 +281,8 @@ scm_location_cs --> nb_care_site
 map_domain --> nb_care_site
 nb_care_site --> CARE_SITE
 ```
+
+
 
 ---
 
@@ -401,3 +408,6 @@ epic_loc --> nb_care_site
 map_domain --> nb_care_site
 nb_care_site --> CARE_SITE
 ```
+
+
+
