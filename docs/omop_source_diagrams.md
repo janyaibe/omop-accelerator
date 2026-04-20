@@ -169,13 +169,16 @@ flowchart LR
 subgraph SOURCE[SCM / Sunrise Source]
     scm_person[SCM PERSON]
     scm_visit[SCM VISIT]
-    scm_order[SCM dbo_cv3order - Medication]
+    scm_order[SCM dbo_cv3order - Medication and Procedure]
     scm_medext[SCM dbo_cv3medicationextension]
     scm_generic[SCM dbo_sxammgenericitem - RxNorm]
-    scm_proc_placeholder[SCM procedure tables - not available]
+    scm_omny_soarian[SCM billing Soarian omny_accounts]
+    scm_omny_dss[SCM billing DSS omny_accounts]
+    scm_omny_athena[SCM billing Athena omny_accounts]
+    scm_condition_detail[SCM dbo_cv3clientdocdetail_bkp]
+    scm_condition_doc[SCM dbo_cv3clientdocumentcur]
     scm_obs[SCM dbo_cv3observationcur]
     scm_order_task[SCM dbo_cv3ordertaskoccurrence]
-    scm_device_placeholder[SCM device exposure - notebook not found]
     scm_client[SCM dbo_cv3client]
     scm_obs_note[SCM dbo_scaobservation]
     scm_doc[SCM dbo_scadocument]
@@ -196,12 +199,18 @@ subgraph NB[Hydration Notebooks]
     nb_person[allscripts_scm_person.ipynb]
     nb_visit_occ[allscripts_sunrise_visit_occurence.ipynb]
     nb_visit_detail[allscripts_scm_visit_detail.ipynb]
+    nb_condition[allscripts_sunrise_condition_occurrence.ipynb]
+    nb_condition_era[allscripts_scm_condition_era.ipynb]
     nb_obs[allscripts_scm_observation.ipynb]
     nb_drug[allscripts_sunrise_drug_exposure.ipynb]
     nb_proc[allscripts_scm_procedure_occurrence.ipynb]
     nb_meas[allscripts_scm_measurement.ipynb]
+    nb_episode[allscripts_scm_episode.ipynb]
+    nb_episode_event[allscripts_scm_episode_event.ipynb]
+    nb_obs_period[allscripts_sunrise_observation_period.ipynb]
     nb_death[allscripts_scm_death.ipynb]
     nb_note[allscripts_scm_note.ipynb]
+    nb_device[allscripts_scm_device_exposure.ipynb]
     nb_provider[allscripts_scm_provider.ipynb]
     nb_location[allscripts_scm_location.ipynb]
     nb_care_site[allscripts_scm_care_site.ipynb]
@@ -212,10 +221,15 @@ subgraph OMOP[OMOP Tables]
     VISIT_OCCURRENCE
     VISIT_DETAIL
     OBSERVATION
+    CONDITION_OCCURRENCE
+    CONDITION_ERA
     DRUG_EXPOSURE
     PROCEDURE_OCCURRENCE
     MEASUREMENT
+    EPISODE
+    EPISODE_EVENT
     DEVICE_EXPOSURE
+    OBSERVATION_PERIOD
     DEATH
     NOTE
     PROVIDER
@@ -233,6 +247,14 @@ nb_visit_occ --> VISIT_OCCURRENCE
 scm_visit --> nb_visit_detail
 nb_visit_detail --> VISIT_DETAIL
 
+scm_condition_detail --> nb_condition
+scm_condition_doc --> nb_condition
+map_person --> nb_condition
+nb_condition --> CONDITION_OCCURRENCE
+
+CONDITION_OCCURRENCE --> nb_condition_era
+nb_condition_era --> CONDITION_ERA
+
 scm_visit --> nb_obs
 map_domain --> nb_obs
 nb_obs --> OBSERVATION
@@ -244,7 +266,11 @@ map_domain --> nb_drug
 map_person --> nb_drug
 nb_drug --> DRUG_EXPOSURE
 
-scm_proc_placeholder --> nb_proc
+scm_order --> nb_proc
+scm_order_task --> nb_proc
+scm_omny_soarian --> nb_proc
+scm_omny_dss --> nb_proc
+scm_omny_athena --> nb_proc
 map_domain --> nb_proc
 map_person --> nb_proc
 nb_proc --> PROCEDURE_OCCURRENCE
@@ -255,7 +281,28 @@ map_domain --> nb_meas
 map_person --> nb_meas
 nb_meas --> MEASUREMENT
 
-scm_device_placeholder --> DEVICE_EXPOSURE
+scm_obs --> nb_device
+map_domain --> nb_device
+map_person --> nb_device
+nb_device --> DEVICE_EXPOSURE
+
+CONDITION_OCCURRENCE --> nb_episode
+nb_episode --> EPISODE
+
+EPISODE --> nb_episode_event
+CONDITION_OCCURRENCE --> nb_episode_event
+MEASUREMENT --> nb_episode_event
+DRUG_EXPOSURE --> nb_episode_event
+VISIT_OCCURRENCE --> nb_episode_event
+nb_episode_event --> EPISODE_EVENT
+
+PERSON --> nb_obs_period
+VISIT_OCCURRENCE --> nb_obs_period
+OBSERVATION --> nb_obs_period
+DRUG_EXPOSURE --> nb_obs_period
+CONDITION_OCCURRENCE --> nb_obs_period
+MEASUREMENT --> nb_obs_period
+nb_obs_period --> OBSERVATION_PERIOD
 
 scm_client --> nb_death
 map_person --> nb_death

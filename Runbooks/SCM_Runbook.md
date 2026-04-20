@@ -30,11 +30,19 @@ Allscripts SCM / Sunrise → Bronze → Mapping Tables → Hydration Notebooks �
 - drug_exposure  
 - measurement  
 - observation  
+- note  
 - device_exposure  
 
 ### Phase 4 — Lifecycle
 - observation_period  
 - death  
+
+### Phase 5 — Derived Domains
+- condition_era  
+- drug_era  
+- dose_era  
+- episode  
+- episode_event  
 
 ---
 
@@ -89,7 +97,7 @@ Provides additional encounter granularity
 ---
 
 ### CLINICAL DOMAINS
-- **Domains:** condition, procedure, drug, measurement, observation, device  
+- **Domains:** condition, procedure, drug, measurement, observation, note, device  
 - **Pattern:**
   - Join to person and visit  
   - Map concepts  
@@ -97,6 +105,10 @@ Provides additional encounter granularity
 - **Dependencies:**
   - `source_to_person`
   - `source_to_visit_occurrence`
+- **Procedure note:** SCM procedure work currently has two source patterns in-repo:
+  - OMOP hydration in `allscripts_scm_procedure_occurrence.ipynb` derived from Sunrise `dbo_cv3order` / `dbo_cv3ordertaskoccurrence`
+  - client-provided billing extract logic in `(Clone) procedures_SCM.py` derived from Soarian, DSS, and Athena `omny_accounts`
+  Reconcile these before treating procedure ARES failures as fully addressed.
 
 ---
 
@@ -107,6 +119,14 @@ Defines patient activity window based on visit and clinical data
 
 ### DEATH
 Captures mortality data linked to `person_id`
+
+---
+
+### DERIVED DOMAINS
+- `condition_era` depends on hydrated SCM `condition_occurrence`
+- `drug_era` and `dose_era` depend on hydrated SCM `drug_exposure`
+- `episode` depends on hydrated SCM `condition_occurrence` and the approved disease-episode concept set
+- `episode_event` depends on populated SCM `episode`, `visit_occurrence`, `measurement`, and `drug_exposure`
 
 ---
 
@@ -132,6 +152,14 @@ Checks include:
 - Execute in Databricks environment  
 - Run notebooks sequentially by phase  
 - Re-run downstream domains if upstream changes  
+- For the current SCM tracker baseline, refresh in this order:
+  1. `condition_occurrence`
+  2. `condition_era`
+  3. `episode`
+  4. `episode_event`
+  5. `observation_period`
+  6. `death`
+  7. rerun OHDSI Ares / DQD and compare against the latest SCM baseline
 
 ---
 
