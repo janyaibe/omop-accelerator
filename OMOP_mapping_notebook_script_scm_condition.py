@@ -116,16 +116,25 @@ CONDITION_HINT_PATTERN = re.compile(
 
 
 def _decode_base64_rtf(value):
+    """Decode base64-wrapped RTF from Spark BINARY / Python bytes-like types.
+
+    PySpark passes BINARY columns to Python UDFs as ``bytearray``; treating that
+    as ``str(value)`` breaks base64 decoding. Accept bytes, bytearray, memoryview,
+    and unicode strings.
+    """
     if value is None:
         return None
 
     try:
-        if isinstance(value, bytes):
-            raw_value = value.decode("utf-8", "ignore")
+        if isinstance(value, (bytes, bytearray, memoryview)):
+            blob = bytes(value)
+            # Most rows store ASCII base64; ``b64decode`` accepts bytes directly.
+            decoded_bytes = base64.b64decode(blob, validate=False)
         else:
-            raw_value = str(value)
+            raw_value = str(value).strip()
+            decoded_bytes = base64.b64decode(raw_value, validate=False)
 
-        decoded = base64.b64decode(raw_value).decode("utf-8", "ignore")
+        decoded = decoded_bytes.decode("utf-8", "ignore")
     except Exception:
         return None
 
@@ -134,7 +143,9 @@ def _decode_base64_rtf(value):
     text = re.sub(r"\\'[0-9a-fA-F]{2}", " ", text)
     text = re.sub(r"\\[a-zA-Z]+-?\d*\s?", " ", text)
     text = text.replace("{", " ").replace("}", " ")
-    text = re.sub(r"\s+", " ", text)
+    # Preserve line breaks so section headers like "Assessment:" stay matchable.
+    text = re.sub(r"[^\S\n]+", " ", text)
+    text = re.sub(r"[ \t]*\n[ \t]*", "\n", text)
     return text.strip() or None
 
 
@@ -244,6 +255,22 @@ df_source_joined = (
         F.col("txt.DetailText").alias("detail_text_b64"),
     )
 )
+
+# Quick decode sanity check (first few non-null DetailText rows).
+_preview_rows = (
+    df_source_joined.filter(F.col("detail_text_b64").isNotNull())
+    .select(decode_base64_rtf_udf(F.col("detail_text_b64")).alias("preview_decoded"))
+    .limit(5)
+    .collect()
+)
+print("Decode preview (first non-null DetailText rows, truncated):")
+for i, prow in enumerate(_preview_rows):
+    ptxt = prow["preview_decoded"]
+    if ptxt:
+        snippet = ptxt[:480] + "…" if len(ptxt) > 480 else ptxt
+        print(f"  [{i}] len={len(ptxt)} preview={snippet!r}")
+    else:
+        print(f"  [{i}] decoded=None (still failing — check column type / payload)")
 
 df_source_decoded = (
     df_source_joined
