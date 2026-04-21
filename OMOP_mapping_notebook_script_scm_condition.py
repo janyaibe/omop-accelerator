@@ -47,6 +47,7 @@ DISTINCT_RESULTS_TABLE = "_exponent.results_store.omop_mapping_scm_condition_dis
 FINAL_ROW_RESULTS_TABLE = "_exponent.results_store.omop_mapping_scm_condition_row_results_v1"
 REVIEW_TABLE = "_exponent.results_store.omop_mapping_scm_condition_review_v1"
 FINAL_OUTPUT_TABLE = "_exponent.results_store.omop_mapping_scm_condition_final_output_v1"
+# Load AUTO_MATCH / REVIEW_REQUIRED rows into OMOP: omop/hydration/condition_occurrence/allscripts_scm_condition_occurrence_from_text_mapping.ipynb
 
 # --- Config ---
 AUTO_MATCH_THRESHOLD = 0.92
