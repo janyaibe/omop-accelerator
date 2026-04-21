@@ -49,11 +49,13 @@ REVIEW_TABLE = "_exponent.results_store.omop_mapping_scm_condition_review_v1"
 FINAL_OUTPUT_TABLE = "_exponent.results_store.omop_mapping_scm_condition_final_output_v1"
 # Load AUTO_MATCH / REVIEW_REQUIRED rows into OMOP: omop/hydration/condition_occurrence/allscripts_scm_condition_occurrence_from_text_mapping.ipynb
 
-# --- Config ---
-AUTO_MATCH_THRESHOLD = 0.92
-REVIEW_THRESHOLD = 0.65
+# --- Config (wider funnel — tune down if noise dominates) ---
+AUTO_MATCH_THRESHOLD = 0.88
+REVIEW_THRESHOLD = 0.52
 MIN_TOKEN_LEN = 3
-MAX_EXTRACTED_PHRASE_LEN = 180
+MAX_EXTRACTED_PHRASE_LEN = 220
+# Single-token phrases shorter than this still need a clinical hint or 2+ tokens.
+MIN_PHRASE_LEN_SINGLE_TOKEN = 10
 
 RUN_ID = f"SCM_OMOP_CONDITION_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
 RUN_TIMESTAMP = datetime.utcnow().isoformat(timespec="seconds")
@@ -88,11 +90,14 @@ print("SCM condition mapping constants loaded.")
 # =============================================================================
 
 DOC_INCLUDE_PATTERN = re.compile(
-    r"(h&p|history|patient profile|assessment|plan of care|consult|problem|diagn)",
+    r"(h&p|history|patient profile|assessment|plan of care|consult|problem|diagn|discharge|"
+    r"progress|summary|clinical|admission|hpi|pmh|nicu|nursery|rounding|emergency|ed course|"
+    r"operative|post-?op|pre-?op|delivery|l&d|obstetr|gynecol)",
     re.IGNORECASE,
 )
 DOC_EXCLUDE_PATTERN = re.compile(
-    r"(vital signs|intake & output|vent|flowsheet|education outcome|goal outcome|critical value)",
+    r"(vital signs|intake & output|i&o|flowsheet|education outcome|goal outcome|critical value|"
+    r"med admin|mar\b|telephone triage)",
     re.IGNORECASE,
 )
 
@@ -102,6 +107,13 @@ SECTION_PATTERNS = [
     re.compile(r"condition\s*:\s*([^\n\r]{3,120})", re.IGNORECASE),
     re.compile(r"reason for (?:infant'?s )?admission\s*:\s*([^\n\r]{3,240})", re.IGNORECASE),
     re.compile(r"assessment(?: and plan)?\s*:\s*([^\n\r]{3,360})", re.IGNORECASE),
+    re.compile(r"diagnos(?:is|es)\s*:\s*([^\n\r]{3,400})", re.IGNORECASE),
+    re.compile(r"impression\s*:\s*([^\n\r]{3,400})", re.IGNORECASE),
+    re.compile(r"active problems?\s*:\s*([^\n\r]{3,360})", re.IGNORECASE),
+    re.compile(r"chief complaint\s*:\s*([^\n\r]{3,280})", re.IGNORECASE),
+    re.compile(r"(?:history of present illness|hpi)\s*:\s*([^\n\r]{3,400})", re.IGNORECASE),
+    re.compile(r"(?:past medical history|pmh)\s*:\s*([^\n\r]{3,400})", re.IGNORECASE),
+    re.compile(r"medical history\s*:\s*([^\n\r]{3,400})", re.IGNORECASE),
 ]
 
 GENERIC_REJECT_PATTERN = re.compile(
@@ -113,7 +125,12 @@ CONDITION_HINT_PATTERN = re.compile(
     r"(distress|syndrome|labor|gestation|pregnan|prematur|preterm|respiratory|sepsis|"
     r"asthma|diabetes|hypertension|obesity|hypothyroid|anxiety|depression|gbs|"
     r"pneumonia|apnea|infection|fistula|entanglement|multiple gestation|jaundice|"
-    r"anemia|failure|disease|disorder|defect|hemorrhage|nec|necrotizing|chf|ckd)",
+    r"anemia|failure|disease|disorder|defect|hemorrhage|nec|necrotizing|chf|ckd|"
+    r"pain|fever|cough|murmur|edema|fracture|injury|trauma|bleed|hypox|tachy|brady|"
+    r"hyper|hypo|renal|hepatic|bowel|uterine|placenta|cord|neonatal|icterus|feeding|"
+    r"dehydrat|acidosis|alkalosis|cervix|uterus|oligohyd|polyhyd|macrosom|iagr|"
+    r"chorioamnionitis|preeclamp|eclamp|hellp|gdm|dm\b|htn\b|uti\b|gerd|"
+    r"arrhythm|stenosis|insufficiency|regurgitation|effusion|tamponade)",
     re.IGNORECASE,
 )
 
@@ -234,8 +251,10 @@ def _extract_condition_phrases(decoded_text, patcare_doc_name, document_name):
         if GENERIC_REJECT_PATTERN.match(cleaned):
             return
         alpha_tokens = re.findall(r"[A-Za-z]{3,}", cleaned)
-        if not CONDITION_HINT_PATTERN.search(cleaned) and len(alpha_tokens) < 2:
-            return
+        has_hint = bool(CONDITION_HINT_PATTERN.search(cleaned))
+        if not has_hint:
+            if len(alpha_tokens) < 2 and len(cleaned) < MIN_PHRASE_LEN_SINGLE_TOKEN:
+                return
         key = cleaned.lower()
         if key not in seen:
             seen.add(key)
@@ -248,19 +267,17 @@ def _extract_condition_phrases(decoded_text, patcare_doc_name, document_name):
             if cleaned:
                 _maybe_add(cleaned)
 
-    # Fallback: section headers missing/noisy after RTF strip — mine clue lines from body.
-    if not extracted and working_text:
-        for line in re.split(r"[\n\r]+", working_text):
-            cleaned = re.sub(r"\s+", " ", line).strip(" .:-•\t")
-            if not cleaned or len(cleaned) > MAX_EXTRACTED_PHRASE_LEN:
+    # Always scan body lines: section regexes miss many real notes after RTF cleanup.
+    for line in re.split(r"[\n\r]+", working_text):
+        cleaned = re.sub(r"\s+", " ", line).strip(" .:-•\t")
+        if not cleaned or len(cleaned) > MAX_EXTRACTED_PHRASE_LEN:
+            continue
+        if doc_title_excludes:
+            continue
+        if source_label and not doc_title_includes:
+            if not CONDITION_HINT_PATTERN.search(cleaned):
                 continue
-            if doc_title_excludes:
-                continue
-            if source_label and not doc_title_includes:
-                # Title did not match include list; still allow strong clinical lines.
-                if not CONDITION_HINT_PATTERN.search(cleaned):
-                    continue
-            _maybe_add(cleaned)
+        _maybe_add(cleaned)
 
     return extracted
 
@@ -484,15 +501,15 @@ df_candidate_pairs = (
     .withColumn(
         "contains_bonus",
         F.when(F.col("concept_name_lower") == F.col("source_value_clean"), F.lit(0.35))
-        .when(F.col("concept_name_lower").contains(F.col("source_value_clean")), F.lit(0.18))
-        .when(F.col("source_value_clean").contains(F.col("concept_name_lower")), F.lit(0.12))
+        .when(F.col("concept_name_lower").contains(F.col("source_value_clean")), F.lit(0.22))
+        .when(F.col("source_value_clean").contains(F.col("concept_name_lower")), F.lit(0.14))
         .otherwise(F.lit(0.0)),
     )
     .withColumn(
         "confidence",
         F.least(
             F.lit(1.0),
-            F.greatest(F.col("token_overlap"), F.col("concept_overlap") * F.lit(0.65)) + F.col("contains_bonus"),
+            F.greatest(F.col("token_overlap"), F.col("concept_overlap") * F.lit(0.72)) + F.col("contains_bonus"),
         ),
     )
 )
