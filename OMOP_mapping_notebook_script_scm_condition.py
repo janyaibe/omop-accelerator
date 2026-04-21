@@ -19,6 +19,7 @@
 import base64
 import re
 from datetime import datetime
+from typing import Optional
 
 import pyspark.sql.functions as F
 from pyspark.sql import Window
@@ -110,43 +111,95 @@ GENERIC_REJECT_PATTERN = re.compile(
 CONDITION_HINT_PATTERN = re.compile(
     r"(distress|syndrome|labor|gestation|pregnan|prematur|preterm|respiratory|sepsis|"
     r"asthma|diabetes|hypertension|obesity|hypothyroid|anxiety|depression|gbs|"
-    r"pneumonia|apnea|infection|fistula|entanglement|multiple gestation)",
+    r"pneumonia|apnea|infection|fistula|entanglement|multiple gestation|jaundice|"
+    r"anemia|failure|disease|disorder|defect|hemorrhage|nec|necrotizing|chf|ckd)",
     re.IGNORECASE,
 )
 
 
-def _decode_base64_rtf(value):
-    """Decode base64-wrapped RTF from Spark BINARY / Python bytes-like types.
-
-    PySpark passes BINARY columns to Python UDFs as ``bytearray``; treating that
-    as ``str(value)`` breaks base64 decoding. Accept bytes, bytearray, memoryview,
-    and unicode strings.
-    """
-    if value is None:
+def _rtf_blob_to_plain(decoded: str) -> Optional[str]:
+    """Strip common RTF control words; keep newlines for section-style regexes."""
+    if not decoded:
         return None
-
-    try:
-        if isinstance(value, (bytes, bytearray, memoryview)):
-            blob = bytes(value)
-            # Most rows store ASCII base64; ``b64decode`` accepts bytes directly.
-            decoded_bytes = base64.b64decode(blob, validate=False)
-        else:
-            raw_value = str(value).strip()
-            decoded_bytes = base64.b64decode(raw_value, validate=False)
-
-        decoded = decoded_bytes.decode("utf-8", "ignore")
-    except Exception:
-        return None
-
-    # Convert RTF paragraph markers to newlines before stripping control words.
     text = decoded.replace("\\par", "\n")
     text = re.sub(r"\\'[0-9a-fA-F]{2}", " ", text)
     text = re.sub(r"\\[a-zA-Z]+-?\d*\s?", " ", text)
     text = text.replace("{", " ").replace("}", " ")
-    # Preserve line breaks so section headers like "Assessment:" stay matchable.
     text = re.sub(r"[^\S\n]+", " ", text)
     text = re.sub(r"[ \t]*\n[ \t]*", "\n", text)
     return text.strip() or None
+
+
+def _looks_like_rtf(s: str) -> bool:
+    head = s[:800].lower()
+    return "rtf" in head or "\\rtf" in head or "\\par" in head or "\\f" in head
+
+
+def _is_probably_ascii_base64(s: str) -> bool:
+    """Heuristic: BINARY often holds base64 text; do not treat that as decoded RTF."""
+    sample = re.sub(r"\s+", "", s[:800])
+    if len(sample) < 24:
+        return False
+    return bool(re.fullmatch(r"[A-Za-z0-9+/=]+", sample))
+
+
+def _decode_document_text(value):
+    """Decode `DetailText` (BINARY): may be base64-wrapped RTF **or** raw RTF bytes.
+
+    Client environments differ: some land ASCII base64 in BINARY, others land the
+    RTF/octet payload directly. Try raw-text decode first, then base64.
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, str):
+        blob = value.encode("latin-1", errors="ignore")
+    elif isinstance(value, (bytes, bytearray, memoryview)):
+        blob = bytes(value)
+    else:
+        blob = str(value).encode("latin-1", errors="ignore")
+
+    if not blob:
+        return None
+
+    # --- Strategy 1: payload is already RTF / text (UTF-8, UTF-16-LE, Latin-1) ---
+    for encoding in ("utf-8", "utf-16-le", "latin-1"):
+        try:
+            raw = blob.decode(encoding, errors="strict")
+        except Exception:
+            continue
+        if _is_probably_ascii_base64(raw):
+            continue
+        plain = _rtf_blob_to_plain(raw)
+        if plain and (_looks_like_rtf(raw) or len(plain) >= 40):
+            return plain
+
+    # --- Strategy 2: payload is ASCII base64 of an RTF document ---
+    try:
+        ascii_payload = blob.decode("ascii", errors="ignore").strip()
+        if not ascii_payload:
+            return None
+        missing = (-len(ascii_payload)) % 4
+        if missing:
+            ascii_payload += "=" * missing
+        inner = base64.b64decode(ascii_payload, validate=False)
+    except Exception:
+        return None
+
+    for encoding in ("utf-8", "utf-16-le", "latin-1"):
+        try:
+            raw = inner.decode(encoding, errors="strict")
+        except Exception:
+            continue
+        plain = _rtf_blob_to_plain(raw)
+        if plain:
+            return plain
+
+    try:
+        raw = inner.decode("utf-8", errors="ignore")
+        return _rtf_blob_to_plain(raw)
+    except Exception:
+        return None
 
 
 def _extract_condition_phrases(decoded_text, patcare_doc_name, document_name):
@@ -160,49 +213,58 @@ def _extract_condition_phrases(decoded_text, patcare_doc_name, document_name):
         ]
     ).strip()
 
-    if source_label:
-        if not DOC_INCLUDE_PATTERN.search(source_label):
-            return []
-        if DOC_EXCLUDE_PATTERN.search(source_label):
-            return []
+    doc_title_includes = (not source_label) or bool(DOC_INCLUDE_PATTERN.search(source_label))
+    doc_title_excludes = bool(source_label) and bool(DOC_EXCLUDE_PATTERN.search(source_label))
 
     working_text = decoded_text.replace(";", "\n")
     phrases = []
 
-    for pattern in SECTION_PATTERNS:
-        for match in pattern.finditer(working_text):
-            phrases.append(match.group(1))
+    if doc_title_includes and not doc_title_excludes:
+        for pattern in SECTION_PATTERNS:
+            for match in pattern.finditer(working_text):
+                phrases.append(match.group(1))
 
     extracted = []
     seen = set()
 
+    def _maybe_add(cleaned: str) -> None:
+        if len(cleaned) < MIN_TOKEN_LEN or len(cleaned) > MAX_EXTRACTED_PHRASE_LEN:
+            return
+        if GENERIC_REJECT_PATTERN.match(cleaned):
+            return
+        alpha_tokens = re.findall(r"[A-Za-z]{3,}", cleaned)
+        if not CONDITION_HINT_PATTERN.search(cleaned) and len(alpha_tokens) < 2:
+            return
+        key = cleaned.lower()
+        if key not in seen:
+            seen.add(key)
+            extracted.append(cleaned)
+
     for raw_phrase in phrases:
-        # Split broad sections into smaller candidate phrases.
         parts = re.split(r"[;,]|\band\b", raw_phrase)
         for part in parts:
             cleaned = re.sub(r"\s+", " ", part).strip(" .:-")
-            if not cleaned:
-                continue
-            if len(cleaned) < MIN_TOKEN_LEN or len(cleaned) > MAX_EXTRACTED_PHRASE_LEN:
-                continue
-            if GENERIC_REJECT_PATTERN.match(cleaned):
-                continue
+            if cleaned:
+                _maybe_add(cleaned)
 
-            # Prefer phrases that contain an obvious condition-like cue or
-            # contain multiple alphabetic tokens.
-            alpha_tokens = re.findall(r"[A-Za-z]{3,}", cleaned)
-            if not CONDITION_HINT_PATTERN.search(cleaned) and len(alpha_tokens) < 2:
+    # Fallback: section headers missing/noisy after RTF strip — mine clue lines from body.
+    if not extracted and working_text:
+        for line in re.split(r"[\n\r]+", working_text):
+            cleaned = re.sub(r"\s+", " ", line).strip(" .:-•\t")
+            if not cleaned or len(cleaned) > MAX_EXTRACTED_PHRASE_LEN:
                 continue
-
-            key = cleaned.lower()
-            if key not in seen:
-                seen.add(key)
-                extracted.append(cleaned)
+            if doc_title_excludes:
+                continue
+            if source_label and not doc_title_includes:
+                # Title did not match include list; still allow strong clinical lines.
+                if not CONDITION_HINT_PATTERN.search(cleaned):
+                    continue
+            _maybe_add(cleaned)
 
     return extracted
 
 
-decode_base64_rtf_udf = F.udf(_decode_base64_rtf, StringType())
+decode_document_text_udf = F.udf(_decode_document_text, StringType())
 extract_condition_phrases_udf = F.udf(_extract_condition_phrases, ArrayType(StringType()))
 
 # COMMAND ----------
@@ -230,12 +292,12 @@ df_source_joined = (
     spark.table(SOURCE_TEXT_TABLE).alias("txt")
     .join(
         spark.table(SOURCE_DETAIL_TABLE).alias("detail"),
-        F.col("txt.ClientDocDetailGUID") == F.col("detail.GUID"),
+        F.col("txt.ClientDocDetailGUID").cast("string") == F.col("detail.GUID").cast("string"),
         "inner",
     )
     .join(
         spark.table(SOURCE_DOCUMENT_TABLE).alias("doc"),
-        F.col("detail.ClientDocumentGUID") == F.col("doc.GUID"),
+        F.col("detail.ClientDocumentGUID").cast("string") == F.col("doc.GUID").cast("string"),
         "left",
     )
     .join(
@@ -256,10 +318,14 @@ df_source_joined = (
     )
 )
 
+joined_rows = df_source_joined.count()
+joined_with_text = df_source_joined.filter(F.col("detail_text_b64").isNotNull()).count()
+print(f"Pipeline stage: joined rows = {joined_rows:,}, non-null DetailText = {joined_with_text:,}")
+
 # Quick decode sanity check (first few non-null DetailText rows).
 _preview_rows = (
     df_source_joined.filter(F.col("detail_text_b64").isNotNull())
-    .select(decode_base64_rtf_udf(F.col("detail_text_b64")).alias("preview_decoded"))
+    .select(decode_document_text_udf(F.col("detail_text_b64")).alias("preview_decoded"))
     .limit(5)
     .collect()
 )
@@ -274,7 +340,7 @@ for i, prow in enumerate(_preview_rows):
 
 df_source_decoded = (
     df_source_joined
-    .withColumn("detail_text_decoded", decode_base64_rtf_udf(F.col("detail_text_b64")))
+    .withColumn("detail_text_decoded", decode_document_text_udf(F.col("detail_text_b64")))
     .filter(F.col("detail_text_decoded").isNotNull())
     .withColumn(
         "source_phrases",
