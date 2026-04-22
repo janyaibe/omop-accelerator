@@ -7,22 +7,22 @@
 -- -------------------------------------------------------------------------
 -- 0) Base table row counts
 -- -------------------------------------------------------------------------
--- SELECT count(*) AS n_detail_only FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail`;
+-- SELECT count(*) AS n_detail_only FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail_bkp`;
 -- SELECT count(*) AS n_doc_only FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocumentcur`;
 --
 -- -------------------------------------------------------------------------
 -- 1) Single-row scoreboard (inner join, coded fields, then full filter stack)
 -- -------------------------------------------------------------------------
 SELECT
-  (SELECT count(*) FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail`) AS n_detail,
+  (SELECT count(*) FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail_bkp`) AS n_detail,
   (SELECT count(*) FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocumentcur`) AS n_doc,
   (SELECT count(*)
-   FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail` d
+   FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail_bkp` d
    INNER JOIN `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocumentcur` doc
      ON d.ClientDocumentGUID = doc.GUID
   ) AS n_inner_join_no_filters,
   (SELECT count(*)
-   FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail` d
+   FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail_bkp` d
    INNER JOIN `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocumentcur` doc
      ON d.ClientDocumentGUID = doc.GUID
    WHERE d.CodingScheme IS NOT NULL
@@ -31,7 +31,7 @@ SELECT
      AND d.ClientGUID IS NOT NULL
   ) AS n_after_coded_fields,
   (SELECT count(*)
-   FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail` d
+   FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail_bkp` d
    INNER JOIN `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocumentcur` doc
      ON d.ClientDocumentGUID = doc.GUID
    WHERE d.Active = TRUE
@@ -52,14 +52,14 @@ SELECT
 --   sum(CASE WHEN d.Active = true THEN 1 ELSE 0 END) AS n_detail_active_eq_true,
 --   sum(CASE WHEN d.Active IN (1, '1', 'true', 'Y', 'T') THEN 1 ELSE 0 END) AS n_detail_active_loose,
 --   sum(CASE WHEN d.Active IS NULL THEN 1 ELSE 0 END) AS n_detail_active_null
--- FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail` d;
+-- FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail_bkp` d;
 --
 -- -------------------------------------------------------------------------
 -- 3) If n_inner_join_no_filters = 0: orphan details (no parent document row)
 -- -------------------------------------------------------------------------
 -- SELECT
 --   (SELECT count(*)
---    FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail` d
+--    FROM `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocdetail_bkp` d
 --    LEFT JOIN `_exponent`.`_bronze_allscripts_scm_prod_01`.`dbo_cv3clientdocumentcur` doc
 --      ON d.ClientDocumentGUID = doc.GUID
 --    WHERE doc.GUID IS NULL

@@ -5,8 +5,9 @@
 # First-pass SCM condition mapping workflow sourced from Sunrise document text.
 #
 # Why this exists:
-# - Coded ICD path uses `dbo_cv3clientdocdetail` (live); `_bkp` had null
-#   CodingScheme/Code on joinable rows in the same environment.
+# - `dbo_cv3clientdocdetail` (non-bkp) is not in bronze; use `*_bkp` here. If
+#   `CodingScheme` / `CodingSchemeCode` are null on the join, coded OMOP path is
+#   empty; text pipeline remains the main feed.
 # - `dbo_sxacdclientdocdetailtextcur` contains the linked clinical narrative as
 #   base64-encoded RTF, which can be decoded and mined for condition phrases.
 # - This script mirrors the SCM observation / measurement mapping workflow by
@@ -34,7 +35,7 @@ from pyspark.sql.types import (
 
 # --- Source tables ---
 SOURCE_TEXT_TABLE = "_exponent._bronze_allscripts_scm_prod_01.dbo_sxacdclientdocdetailtextcur"
-SOURCE_DETAIL_TABLE = "_exponent._bronze_allscripts_scm_prod_01.dbo_cv3clientdocdetail"
+SOURCE_DETAIL_TABLE = "_exponent._bronze_allscripts_scm_prod_01.dbo_cv3clientdocdetail_bkp"
 SOURCE_DOCUMENT_TABLE = "_exponent._bronze_allscripts_scm_prod_01.dbo_cv3clientdocumentcur"
 SOURCE_DOC_DIM_TABLE = "_exponent._bronze_allscripts_scm.dbo_scadocumentdim"
 
