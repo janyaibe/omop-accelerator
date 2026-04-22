@@ -152,6 +152,7 @@ Checks include:
 - Execute in Databricks environment  
 - Run notebooks sequentially by phase  
 - Re-run downstream domains if upstream changes  
+- **Table resets and handoff:** for which `_exponent` tables to **truncate** or **delete** (gold vs silver vs mapping), when, and the exact notebook for each domain, see [SCM_Hydration_Reset_Handoff.md](SCM_Hydration_Reset_Handoff.md).  
 - For the current SCM tracker baseline, refresh in this order:
   1. `condition_occurrence`
   2. `condition_era`
