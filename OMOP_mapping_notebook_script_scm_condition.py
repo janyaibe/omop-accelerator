@@ -502,8 +502,8 @@ df_candidate_pairs = (
     .withColumn(
         "contains_bonus",
         F.when(F.col("concept_name_lower") == F.col("source_value_clean"), F.lit(0.35))
-        .when(F.col("concept_name_lower").contains(F.col("source_value_clean")), F.lit(0.22))
-        .when(F.col("source_value_clean").contains(F.col("concept_name_lower")), F.lit(0.14))
+        .when(F.instr(F.col("concept_name_lower"), F.col("source_value_clean")) > 0, F.lit(0.22))
+        .when(F.instr(F.col("source_value_clean"), F.col("concept_name_lower")) > 0, F.lit(0.14))
         .otherwise(F.lit(0.0)),
     )
     .withColumn(
