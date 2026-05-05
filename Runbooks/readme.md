@@ -4,9 +4,17 @@ This repository contains execution runbooks for transforming source EHR systems 
 
 ## Systems
 
-- [Epic Clarity](./epic/epic_runbook.md)
-- [Allscripts SCM / Sunrise](./scm/scm_runbook.md)
-- [Allscripts TouchWorks](./touchworks/touchworks_runbook.md)
+- [Epic Clarity](./Epic_Runbook.md)
+- [Allscripts](./Allscripts_Runbook.md)
+
+## Allscripts Index
+
+Use the Allscripts runbooks as separate tracks because SCM / Sunrise and TouchWorks hydrate from different source systems and notebooks:
+
+- **Combined Allscripts:** [Allscripts_Runbook.md](./Allscripts_Runbook.md)
+- **SCM / Sunrise:** [SCM_Runbook.md](./SCM_Runbook.md)
+- **TouchWorks:** [TW_Runbook.md](./TW_Runbook.md)
+- **SCM reset handoff:** [SCM_Hydration_Reset_Handoff.md](./SCM_Hydration_Reset_Handoff.md)
 
 ## Notes
 All runbooks follow a standardized execution framework:
