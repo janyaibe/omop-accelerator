@@ -169,6 +169,20 @@ Provides additional encounter granularity
 
 ---
 
+## NOTE
+- **Source Tables:** HNO_INFO (clinical note metadata), ZC_NOTE_TYPE_IP (note type reference)
+- **Key Transformations:**
+  - Map IP_NOTE_TYPE_C → note_type_concept_id via domain_source_to_concept (Progress Notes, Discharge Summary, etc.)
+  - Extract NOTE_DESC as note_title (note body text requires HNO_NOTE_TEXT extraction from Epic)
+  - Populate note_text from NOTE_DESC (placeholder; full content in HNO_NOTE_TEXT when available)
+  - Exclude deleted notes (DELETE_FLAG = 0, DELETED_CAT_C <> 2)
+- **Visit Linkage:** Date-range matching via PAT_ENC_CSN_ID
+- **Mapping Rate:** 3.7M records ingested; ~100% of records have proper note_type_concept_id mapping
+- **Note:** All 3.7M records populate note_title (from NOTE_DESC); 0% FK orphans
+- **Output:** person_id, note_type_concept_id, note_title, note_date, visit_occurrence_id
+
+---
+
 ## SOURCE VALUE ENHANCEMENTS
 All clinical domains now populate:
 - `*_source_value`: Human-readable source identifier (e.g., CPT_CODE, COMPONENT_ID with FLO_MEAS_ID)
@@ -216,16 +230,23 @@ Checks include:
 1. `epic_clarity_condition_occurrence.ipynb` — Added visit linkage via date-range matching (Cell-7)
 2. `epic_clarity_procedure_occurrence.ipynb` — Added hsp_transactions + arpb_transactions sources (Cell-5), visit linkage (Cell-14)
 3. `epic_clarity_drug_exposure.ipynb` — Added visit linkage (Cell-8)
-4. `epic_clarity_measurement.ipynb` — 3-tier LOINC fallback (Cell-6), visit linkage hybrid (Cell-9)
+4. `epic_clarity_measurement.ipynb` — 3-tier LOINC fallback (Cell-6), visit linkage hybrid (Cell-9); flowsheet hydration steps added as commented-out code at end (Step 1-5) for future implementation
 5. `epic_clarity_observation.ipynb` — Added visit linkage (Cell-16)
+6. `epic_clarity_note.ipynb` — Fixed note type concept mapping (Cell-4), populated note_title from NOTE_DESC, added visit linkage (Cell-8)
 
 **Validation Results:**
 - Procedure concept mapping: 8.30% (up from 0.07% before HSP+ARPB additions)
 - Procedure visit linkage: 70.27%
-- Measurement visit linkage: 76.77% (hybrid encounter join)
+- Measurement visit linkage: 76.77% (hybrid encounter join); note: order_results only, flowsheet not yet integrated
 - Condition visit linkage: 82.65%
 - Observation visit linkage: 100%
+- Note records: 3.7M (up from 161K); 100% have note_title populated; concept mapping functional (multiple concept IDs per type)
 - Data cleanup: 314K orphaned procedure records removed
+
+**Flowsheet Measurement Status:**
+- Flowsheet hydration steps (Steps 1-5) added to `epic_clarity_measurement.ipynb` as commented-out code blocks
+- Ready to activate once visit linkage strategy finalized (currently blocked on encounter-to-flowsheet mapping clarification)
+- Estimated 2.3B flowsheet records available for ingestion with full source fidelity (concept_id = 0)
 
 ---
 
@@ -261,10 +282,11 @@ Checks include:
 - **Data Quality:** Records ingested before birth, after death, or with implausible dates are excluded via plausibility filters
 
 ### Known Limitations
-- Flowsheet data (IP_FLWSHT_MEAS, 2.2B records) not yet integrated — requires patient/encounter linkage documentation from source system
-- Measurement concept mapping limited by availability of LOINC codes in source
+- Flowsheet measurement data (IP_FLWSHT_MEAS, 2.3B records) hydration steps added as commented-out code in measurement notebook — ready for activation once visit linkage strategy defined
+- Measurement concept mapping limited by availability of LOINC codes in source (flowsheet records without LOINC codes)
 - Drug concept mapping relies on generic_name text parsing — incomplete for branded/complex medications
 - BDC_LOINC_CODES table empty; alternative procedure tables (AP_CLAIM_*) not yet integrated
+- Note body text (hno_note_text) not available in bronze extract — full clinical note content requires re-extraction from Epic (NOTE_DESC title-only used as current placeholder)
 
 ### Environment-Specific Configuration
 - Managed within Databricks notebooks
