@@ -1,0 +1,21 @@
+Status,Table,Check Type,Description,% Failed,# Failed,Priority,Issue Type,Action
+FAIL,DOSE_ERA,NULL Check,NULL value in DOSE_VALUE field,100.00%,2260835,HIGH,Data Quality,Cannot fix - Epic has no dose data
+FAIL,NOTE,Invalid Concept,Records without standard valid concept in NOTE_CLASS_CONCEPT_ID,100.00%,161788,HIGH,Concept Mapping,Add NOTE_CLASS source mapping
+FAIL,NOTE,Invalid Concept,Records without standard valid concept in NOTE_TYPE_CONCEPT_ID,100.00%,161788,HIGH,Concept Mapping,Add NOTE_TYPE source mapping
+FAIL,DEVICE_EXPOSURE,Source Concept,Value of 0 in DEVICE_SOURCE_CONCEPT_ID field,100.00%,37594,MEDIUM,Concept Mapping,Add DEVICE concept mapping
+FAIL,DRUG_EXPOSURE,Source Concept,Value of 0 in DRUG_SOURCE_CONCEPT_ID field,100.00%,3561928,CRITICAL,Concept Mapping,Add DRUG concept mapping
+FAIL,MEASUREMENT,Source Concept,Value of 0 in MEASUREMENT_SOURCE_CONCEPT_ID field,100.00%,535964560,CRITICAL,Concept Mapping,Add LOINC mapping
+FAIL,OBSERVATION,Source Concept,Value of 0 in OBSERVATION_SOURCE_CONCEPT_ID field,100.00%,12128415,CRITICAL,Concept Mapping,Add OBSERVATION concept mapping
+FAIL,PROCEDURE_OCCURRENCE,Source Concept,Value of 0 in PROCEDURE_SOURCE_CONCEPT_ID field,100.00%,72472168,CRITICAL,Concept Mapping,Add CPT mapping
+FAIL,MEASUREMENT,Source Value,Distinct source values in MEASUREMENT_SOURCE_VALUE mapped to 0,100.00%,535964560,CRITICAL,Concept Mapping,Add LOINC mapping
+FAIL,PROCEDURE_OCCURRENCE,Source Value,Distinct source values in PROCEDURE_SOURCE_VALUE mapped to 0,100.00%,163375,MEDIUM,Concept Mapping,Add CPT mapping
+FAIL,OBSERVATION,Standard Concept,Value of 0 in standard concept field UNIT_CONCEPT_ID,100.00%,12128415,HIGH,Concept Mapping,Add UNIT concept mapping
+FAIL,PROCEDURE_OCCURRENCE,Standard Concept,Value of 0 in standard concept field PROCEDURE_CONCEPT_ID,100.00%,72472168,CRITICAL,Concept Mapping,Add CPT mapping
+FAIL,VISIT_DETAIL,Standard Concept,Value of 0 in standard concept field VISIT_DETAIL_CONCEPT_ID,100.00%,2274757,HIGH,Concept Mapping,Add VISIT_TYPE mapping
+FAIL,DRUG_ERA,Person Coverage,Persons without at least one record in DRUG_ERA table,95.97%,9817740,LOW,Data Coverage,Expected - not all patients have drugs
+FAIL,DRUG_EXPOSURE,Person Coverage,Persons without at least one record in DRUG_EXPOSURE table,95.82%,N/A,LOW,Data Coverage,Expected - not all patients have drugs
+FIXED,CONDITION_OCCURRENCE,Gender Plausibility,Gender-specific condition mismatches,0.00%,0,COMPLETED,Gender Mismatch,DELETED 165 records
+FIXED,OBSERVATION_PERIOD,Date Plausibility,END_DATE occurs after death,0.00%,0,COMPLETED,Date Logic,DELETED 3315 records
+FIXED,DOSE_ERA,Date Plausibility,END_DATE greater than CURRENT_DATE,0.00%,0,COMPLETED,Date Logic,Capped in notebook
+FIXED,DRUG_ERA,Date Plausibility,END_DATE greater than CURRENT_DATE,0.00%,0,COMPLETED,Date Logic,Capped in notebook
+FIXED,DRUG_EXPOSURE,Date Plausibility,END_DATE greater than CURRENT_DATE,0.00%,0,COMPLETED,Date Logic,Updated source table

@@ -1,0 +1,33 @@
+Status,Table,Check Type,Description,% Failed,# Failed,Priority,Issue Type
+FAIL,DOSE_ERA,NULL Check,NULL value in DOSE_VALUE field,100.00%,2260835,HIGH,Data Quality
+FAIL,NOTE,Invalid Concept,Records without standard valid concept in NOTE_CLASS_CONCEPT_ID,100.00%,161788,HIGH,Concept Mapping
+FAIL,NOTE,Invalid Concept,Records without standard valid concept in NOTE_TYPIST_CONCEPT_ID,100.00%,161788,HIGH,Concept Mapping
+FAIL,DEVICE_EXPOSURE,Source Concept,Value of 0 in DEVICE_SOURCE_CONCEPT_ID field,100.00%,37594,HIGH,Concept Mapping
+FAIL,DRUG_EXPOSURE,Source Concept,Value of 0 in DRUG_SOURCE_CONCEPT_ID field,100.00%,3561928,CRITICAL,Concept Mapping
+FAIL,MEASUREMENT,Source Concept,Value of 0 in MEASUREMENT_SOURCE_CONCEPT_ID field,100.00%,535964560,CRITICAL,Concept Mapping
+FAIL,OBSERVATION,Source Concept,Value of 0 in OBSERVATION_SOURCE_CONCEPT_ID field,100.00%,12128415,CRITICAL,Concept Mapping
+FAIL,PROCEDURE_OCCURRENCE,Source Concept,Value of 0 in PROCEDURE_SOURCE_CONCEPT_ID field,100.00%,72472168,CRITICAL,Concept Mapping
+FAIL,PROCEDURE_OCCURRENCE,Source Value,Distinct source values in PROCEDURE_SOURCE_VALUE mapped to 0,100.00%,163375,MEDIUM,Concept Mapping
+FAIL,OBSERVATION,Standard Concept,Value of 0 in standard concept field UNIT_CONCEPT_ID,100.00%,12128415,HIGH,Concept Mapping
+FAIL,PROCEDURE_OCCURRENCE,Standard Concept,Value of 0 in standard concept field PROCEDURE_CONCEPT_ID,100.00%,72472168,CRITICAL,Concept Mapping
+FAIL,VISIT_DETAIL,Standard Concept,Value of 0 in standard concept field VISIT_DETAIL_CONCEPT_ID,100.00%,2274757,HIGH,Concept Mapping
+FAIL,MEASUREMENT,Source Value,Distinct source values in MEASUREMENT_SOURCE_VALUE field mapped to 0,100.00%,535964560,CRITICAL,Concept Mapping
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 26662 (TESTICULAR HYPOFUNCTION) - implausible gender MALE,100.00%,50,MEDIUM,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 192676 (CERVICAL INTRAEPITHELIAL NEOPLASIA GRADE 1) - implausible gender FEMALE,100.00%,1,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 192683 (UTEROVAGINAL PROLAPSE) - implausible gender FEMALE,100.00%,7,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 193818 (CALCULUS OF PROSTATE) - implausible gender MALE,100.00%,2,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 194420 (ENDOMETRIOSIS OF FALLOPIAN TUBE) - implausible gender FEMALE,100.00%,1,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 194611 (CARCINOMA IN SITU OF UTERINE CERVIX) - implausible gender FEMALE,100.00%,5,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 197237 (BENIGN NEOPLASM OF PROSTATE) - implausible gender MALE,100.00%,5,MEDIUM,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 197938 (UTERINE INERTIA) - implausible gender FEMALE,100.00%,1,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 198806 (ABSCESS OF PROSTATE) - implausible gender MALE,100.00%,5,MEDIUM,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 199881 (ENDOMETRIOSIS OF OVARY) - implausible gender FEMALE,100.00%,3,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 200461 (ENDOMETRIOSIS OF UTERUS) - implausible gender FEMALE,100.00%,5,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 200775 (ENDOMETRIAL HYPERPLASIA) - implausible gender FEMALE,100.00%,3,LOW,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 434251 (INJURY OF MALE EXTERNAL GENITAL ORGANS) - implausible gender MALE,17.50%,14,MEDIUM,Gender Mismatch
+FAIL,CONDITION_OCCURRENCE,Gender Plausibility,CONCEPT_ID 200670 (BENIGN NEOPLASM OF MALE GENITAL ORGAN) - implausible gender MALE,12.90%,4,MEDIUM,Gender Mismatch
+FAIL,DOSE_ERA,Date Plausibility,END_DATE greater than DATEADD(DD1,GETDATE()),12.80%,289316,HIGH,Date Logic
+FAIL,DRUG_ERA,Date Plausibility,END_DATE greater than DATEADD(DD1,GETDATE()),12.41%,266608,HIGH,Date Logic
+FAIL,DRUG_EXPOSURE,Date Plausibility,END_DATE greater than DATEADD(DD1,GETDATE()),12.12%,431586,HIGH,Date Logic
+FAIL,DRUG_EXPOSURE,DateTime Plausibility,END_DATETIME greater than DATEADD(DD1,GETDATE()),12.12%,431586,HIGH,Date Logic
+FAIL,OBSERVATION_PERIOD,Date Plausibility,END_DATE occurs after death,11.95%,3004,MEDIUM,Date Logic
