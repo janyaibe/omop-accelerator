@@ -124,10 +124,63 @@ Captures mortality data linked to `person_id`
 Validated using OHDSI Ares / Data Quality Dashboard (DQD)
 
 Checks include:
-- Identity uniqueness  
-- Visit validity  
-- Mapping completeness  
-- Temporal consistency  
+- Identity uniqueness
+- Visit validity
+- Mapping completeness
+- Temporal consistency
+
+---
+
+## 8.5. Performance & Incremental Loading (90-Day Window)
+
+**⚠️ Critical for Production:** Due to TouchWorks data volume (1.5B+ records) and high cardinality in tables like `device_exposure`, **all hydration notebooks must implement incremental loading via a 90-day rolling window** to prevent memory overload, timeout issues, and excessive compute costs.
+
+### Incremental Strategy
+
+Add WHERE clause filtering to the silver view creation in each notebook:
+
+```sql
+WHERE
+  <timestamp_column> >= CURRENT_DATE - 90
+  AND <timestamp_column> < CURRENT_DATE
+```
+
+### Tables Requiring Incremental Filtering
+- **device_exposure** — high cardinality, very large volume
+- **observation** — numerous lab/result records
+- **condition_occurrence** — historical diagnosis data
+- **drug_exposure** — medication history
+- **measurement** — lab/vital records
+
+### Implementation Pattern
+
+**Step 1:** Identify the timestamp column (varies by domain)
+- observation: `order_activity_date`
+- condition: `status_date` or `entry_date`
+- drug_exposure: `medication_start_date`
+- device: `device_date`
+
+**Step 2:** Add to WHERE clause filter
+```sql
+WHERE order_activity_date >= CURRENT_DATE - 90
+  AND order_activity_date < CURRENT_DATE
+```
+
+**Step 3:** Run on daily/weekly schedule
+- MERGE logic handles upserts automatically
+- Avoids duplicate processing of entire history
+
+### Benefits
+- ✅ Incremental loading without processing entire history
+- ✅ Reduced memory footprint per run
+- ✅ Faster execution times
+- ✅ Prevents resource exhaustion and timeouts
+- ✅ Enables scheduled job automation
+
+### Data Integrity
+- MERGE logic ensures no duplicate records
+- Already-processed records outside 90-day window remain unchanged
+- Full historical backfill completed on initial ETL setup
 
 ---
 
